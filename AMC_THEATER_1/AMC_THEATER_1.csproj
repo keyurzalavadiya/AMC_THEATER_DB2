@@ -156,13 +156,11 @@
     <Compile Include="Models\ScreenTaxViewModel.cs" />
     <Compile Include="Models\ScreenViewModel.cs" />
     <Compile Include="Models\SearchViewModel.cs" />
-    <Compile Include="Models\TaxPayment.cs" />
     <Compile Include="Models\TaxPaymentViewModel.cs" />
     <Compile Include="Models\TheaterDueViewModel.cs" />
     <Compile Include="Models\TheaterTaxViewModel.cs" />
     <Compile Include="Models\TheaterViewModel.cs" />
     <Compile Include="Models\THEATER_TAX_PAYMENT.cs" />
-    <Compile Include="Models\THEATER_TAX_PAYMNET.cs" />
     <Compile Include="Models\TRN_REGISTRATION.cs" />
     <Compile Include="Models\TRN_THEATRE_DOCS.cs" />
     <Compile Include="Models\USER_LOGIN_DETAILS.cs" />
@@ -218,7 +216,6 @@
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
-    <Content Include="Views\TRN_REGISTRATION\Registration.cshtml" />
     <Content Include="Views\Home\SearchID.cshtml" />
     <Content Include="Views\Home\Receipt.cshtml" />
     <Content Include="Views\Home\PaymentHistoryFilter.cshtml" />
@@ -253,13 +250,13 @@
     <Content Include="Views\Common\Login.cshtml" />
     <Content Include="Views\Common\Seprate_Theater_Tax.cshtml" />
     <Content Include="Views\Common\Home_Page.cshtml" />
+    <Content Include="Views\Common\ReceiptFormat.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Img\" />
     <Folder Include="UploadedDoc\" />
     <Folder Include="UploadedFiles\" />
-    <Folder Include="Views\TRN_REGISTRATIONController\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />

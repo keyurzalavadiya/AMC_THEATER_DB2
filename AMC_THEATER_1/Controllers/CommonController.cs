@@ -13,11 +13,15 @@ namespace AMC_THEATER_1.Controllers
 {
     public class CommonController : Controller
     {
-        readonly ApplicationDbContext db1 = new ApplicationDbContext(); // Ass
+         readonly ApplicationDbContext db1 = new ApplicationDbContext(); // Ass
         DB2Connection db = new DB2Connection("Database=prddb1;uid=prdinst1;pwd=prdinst1;Server=123.63.211.14:50000;");
 
-
         public ActionResult Home_Page()
+        {
+            return View();
+        }
+
+        public ActionResult ReceiptFormat()
         {
             return View();
         }

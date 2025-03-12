@@ -140,79 +140,71 @@ namespace AMC_THEATER_1.Controllers
             {
                 try
                 {
-                    db2Connection.Open();
-
-                    if (model.ApplId == 0) // New Registration
+                    using (var db2Connection = new DB2Connection(db2ConnectionString)) // Ensure proper disposal
                     {
-                        if (!string.IsNullOrEmpty(Request.Form["OfflineTaxPaidYear"]))
+                        db2Connection.Open();
+
+                        if (model.ApplId == 0) // New Registration
                         {
-                            if (int.TryParse(Request.Form["OfflineTaxPaidYear"], out int year))
+                            if (!string.IsNullOrEmpty(Request.Form["OfflineTaxPaidYear"]) && int.TryParse(Request.Form["OfflineTaxPaidYear"], out int year))
                             {
                                 model.OfflineTaxPaidYear = new DateTime(year, 1, 1);
-                                System.Diagnostics.Debug.WriteLine("Parsed OfflineTaxPaidYear: " + model.OfflineTaxPaidYear);
+                                Debug.WriteLine($"Parsed OfflineTaxPaidYear: {model.OfflineTaxPaidYear}");
                             }
-                            else
+
+                            model.TActive = 1; // Ensure column name matches DB2 schema
+                            model.TStatus = "Pending";
+                            db.TRN_REGISTRATION.Add(model);
+                            db.SaveChanges();
+                        }
+                        else // Update existing record
+                        {
+                            // ✅ Use the UpdateTheaterStatus method to handle status updates
+                         
+                            var existingEntity = db.TRN_REGISTRATION.Find(model.ApplId);
+                            UpdateTheaterStatus(existingEntity, actionType, rejectReason);
+                            //if (existingEntity == null)
+                            //{
+                            //    TempData["ErrorMessage"] = "No record found for the provided ID.";
+                            //    return View(model);
+                            //}
+
+                           
+
+                            //// ✅ Update entity values
+                            //db.Entry(existingEntity).CurrentValues.SetValues(model);
+                            //db.Entry(existingEntity).State = EntityState.Modified;
+                            //db.SaveChanges();
+
+                            // 🧹 Clear existing child records before adding new ones
+                            db.NO_OF_SCREENS.RemoveRange(db.NO_OF_SCREENS.Where(d => d.ApplId == model.ApplId));
+                            db.SaveChanges(); // Ensure previous deletion is committed
+
+                            // 🆕 Add new child records if available
+                            if (model.NO_OF_SCREENS?.Any() == true)
                             {
-                                System.Diagnostics.Debug.WriteLine("Year parsing failed.");
+                                db.NO_OF_SCREENS.AddRange(model.NO_OF_SCREENS);
                             }
                         }
-                        else
+
+                        // ✅ Ensure documents are handled **after** ApplId is saved
+                        if (documents != null && documents.Length > 0)
                         {
-                            System.Diagnostics.Debug.WriteLine("OfflineTaxPaidYear is null or empty.");
+                            HandleDocuments(model.ApplId, documents);
                         }
 
+                        db.SaveChanges(); // Final save
 
-                        model.TActive = 1; // Ensure column name matches DB2 schema
-                        model.TStatus = "Pending";
-                        db.TRN_REGISTRATION.Add(model);
-                        db.SaveChanges();
+                        transaction.Commit();
+                        return RedirectToAction("List_of_Application", "Common");
                     }
-                    else // Update existing record
-                    {
-                        var existingEntity = db.TRN_REGISTRATION.Find(model.ApplId);
-                        if (existingEntity == null)
-                        {
-                            TempData["ErrorMessage"] = "No record found for the provided ID.";
-                            return View(model);
-                        }
-
-                        db.Entry(existingEntity).CurrentValues.SetValues(model);
-                        db.Entry(existingEntity).State = EntityState.Modified;
-                        db.SaveChanges();
-
-                        // 🧹 Clear existing child records before adding new ones
-                        db.NO_OF_SCREENS.RemoveRange(db.NO_OF_SCREENS.Where(d => d.ApplId == model.ApplId));
-
-                        // 🆕 Add new child records if available
-                        if (model.NO_OF_SCREENS != null && model.NO_OF_SCREENS.Any())
-                        {
-                            db.NO_OF_SCREENS.AddRange(model.NO_OF_SCREENS);
-                        }
-                    }
-
-                    // ✅ Call updated methods
-                    HandleDocuments(model.ApplId, documents);
-                    db.SaveChanges(); // Save the NO_OF_SCREENS changes
-
-                    transaction.Commit();
-                    db2Connection.Close();
-
-                    return RedirectToAction("List_of_Application", "Common");
                 }
                 catch (DbUpdateException ex)
                 {
                     transaction.Rollback();
-                    db2Connection.Close();
-                    Debug.WriteLine($"DB2 Error: {ex.InnerException?.InnerException?.Message}");
-                    TempData["ErrorMessage"] = "Database update error. Check logs for details.";
+                    Debug.WriteLine($"DB2 Error: {ex.ToString()}"); // Capture full stack trace
+                    TempData["ErrorMessage"] = "Database update error. Please contact support.";
                     return View(model);
-                }
-                finally
-                {
-                    if (db2Connection.State == ConnectionState.Open)
-                    {
-                        db2Connection.Close();
-                    }
                 }
             }
         }
@@ -322,14 +314,16 @@ namespace AMC_THEATER_1.Controllers
             db.SaveChanges();
         }
 
-
-
         private void UpdateTheaterStatus(TRN_REGISTRATION existingRegistration, string actionType, string rejectReason)
         {
             var dbEntity = db.TRN_REGISTRATION.SingleOrDefault(r => r.ApplId == existingRegistration.ApplId);
-            if (dbEntity == null) return;
 
-            db.Entry(dbEntity).Reload();
+            if (dbEntity == null)
+            {
+                throw new Exception($"❌ Error: Record with APPLICATION_ID = {existingRegistration.ApplId} not found. It may have been deleted.");
+            }
+
+            db.Entry(dbEntity).Reload(); // ✅ Reload entity to avoid concurrency conflicts
 
             if (actionType == "Edit")
             {
@@ -340,6 +334,11 @@ namespace AMC_THEATER_1.Controllers
                 dbEntity.TActive = 1;
                 dbEntity.TStatus = "Approved";
                 dbEntity.RejectReason = null;
+
+                if (string.IsNullOrEmpty(dbEntity.TId))
+                {
+                    dbEntity.TId = GenerateNextTId();
+                }
             }
             else if (actionType == "Reject")
             {
@@ -350,8 +349,43 @@ namespace AMC_THEATER_1.Controllers
 
             dbEntity.UpdateUser = "System";
             dbEntity.UpdateDate = DateTime.Now;
+
             db.Entry(dbEntity).State = EntityState.Modified;
-            db.SaveChanges();
+
+            try
+            {
+                db.SaveChanges();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                System.Diagnostics.Debug.WriteLine($"⚠️ Concurrency issue detected for APPLICATION_ID: {existingRegistration.ApplId}. Retrying update...");
+
+                // ✅ Reload entity and retry
+                db.Entry(dbEntity).Reload();
+                db.SaveChanges();
+            }
+        }
+
+        private string GenerateNextTId()
+        {
+            var lastTId = db.TRN_REGISTRATION
+                .Where(r => r.TId.StartsWith("T"))
+                .OrderByDescending(r => r.TId)
+                .Select(r => r.TId)
+                .FirstOrDefault();
+
+            int nextNumber = 1;
+
+            if (!string.IsNullOrEmpty(lastTId) && lastTId.Length > 1)
+            {
+                string numberPart = lastTId.Substring(1); // Extract number part (e.g., "0001")
+                if (int.TryParse(numberPart, out int lastNumber))
+                {
+                    nextNumber = lastNumber + 1;
+                }
+            }
+
+            return $"T{nextNumber:D4}"; // Format as T0001, T0002, etc.
         }
 
         private string SanitizeFileName(string fileName)

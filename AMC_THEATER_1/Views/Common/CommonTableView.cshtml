@@ -138,7 +138,7 @@
                                 <tr>
                                     <td class="sticky-column-left">@theater.ApplId</td>
                                     <td class="text-center" style="white-space: nowrap; color: @(theater.T_STATUS.Trim().ToLower() == "approved" ? "green" : "red"); ">
-                                        @(theater.T_STATUS.Trim().ToLower() == "approved" ? theater.ApplId.ToString() : "Not Generated")
+                                        @(theater.T_STATUS.Trim().ToLower() == "approved" ? theater.T_ID.ToString() : "Not Generated")
                                     </td>
 
                                     <td>@theater.T_NAME</td>
