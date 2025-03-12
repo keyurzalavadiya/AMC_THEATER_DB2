@@ -1,0 +1,924 @@
+﻿@model AMC_THEATER_1.Models.TRN_REGISTRATION
+@using System.Linq
+
+@using AMC_THEATER_1.Models
+
+@{
+    ViewBag.Title = "Theater Registration";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.ShowBasicNavbar = false; // Show only the basic navbar
+    ViewBag.ShowHomeIcon = true;
+    ViewBag.Module = true;
+
+    ViewBag.ShowNavbar = true;
+    ViewBag.ShowSideBar = true;
+
+    var documents = ViewBag.Documents as List<AMC_THEATER_1.Models.MST_DOCS> ?? new List<AMC_THEATER_1.Models.MST_DOCS>();
+    var uDocs = ViewBag.UploadedDocs as List<TRN_THEATRE_DOCS> ?? new List<TRN_THEATRE_DOCS>();
+    var documentList = ViewBag.Documents as List<MST_DOCS> ?? new List<MST_DOCS>();
+
+    bool isViewPage = ViewBag.IsViewPage ?? false;
+
+    // ✅ Safely handle null NO_OF_SCREENS
+    var screenList = Model.NO_OF_SCREENS != null ? new List<NO_OF_SCREENS>(Model.NO_OF_SCREENS) : new List<NO_OF_SCREENS>();
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theater Registration Form</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Include Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/Scripts/script.js"></script>
+
+    <style>
+        .container {
+            margin-left: 135px; /* Set this to match the sidebar width */
+            transition: margin-left 0.3s;
+            padding: 15px;
+        }
+    </style>
+</head>
+<body class="bg-light ms-5">
+
+    <div class="container col-md-11 ms-5 mt-3">
+        <div class="card col-md-12 p-4 ms-5 shadow-sm rounded">
+
+
+            @if (ViewBag.Mode == "create")
+            {
+
+                <h2 class="text-center bg-light p-3 mb-4">Theater Registration Application</h2>
+            }
+
+            @if (ViewBag.Mode == "edit" || ViewBag.Mode == "view")
+            {
+                <h2 class="text-center bg-light p-3 mb-4">Theater Registration</h2>
+            }
+
+            @if (ViewBag.Mode == "approve")
+            {
+                <h2 class="text-center bg-light p-3 mb-4">Theater Request</h2>
+            }
+
+            @using (Html.BeginForm("Registration", "Registration", FormMethod.Post, new { id = "TheaterForm", enctype = "multipart/form-data" }))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="T_ID" /> <!-- ✅ Keep T_ID for edit mode -->
+
+                <!-- Theatre Registration Fields -->
+                <div class="row ms-4">
+                    <div class="col-md-4 mb-3">
+                        <label for="TName" class="form-label fw-bold">Theatre Name</label>
+                        @Html.TextBox("TName", Model?.TName, new { @class = "form-control readonly-field", placeholder = "Enter theater name", required = "required" })
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label for="LicenseHolderName" class="form-label fw-bold">Theater License Holder Name <span class="text-danger">*</span></label>
+                        @*@Html.TextBoxFor(m => m.LICENSE_HOLDER_NAME, new { @class = "form-control readonly-field", placeholder = "Enter owner's name", required = "required" })*@
+                        @Html.TextBox("LicenseHolderName", Model?.LicenseHolderName, new { @class = "form-control readonly-field", placeholder = "Enter theater name", required = "required" })
+
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label for="ManagerContactNo" class="form-label fw-bold">Representative / Manager Contact No.</label>
+                        @*@Html.TextBoxFor(m => m.T_OWNER_NUMBER, new { @class = "form-control readonly-field", placeholder = "Enter contact number", required = "required" })*@
+                        @Html.TextBox("ManagerContactNo", Model?.ManagerContactNo, new { @class = "form-control readonly-field", placeholder = "Enter theater name", required = "required" })
+
+                    </div>
+                </div>
+
+                <!-- Address, Email, Commencement Date -->
+                <div class="row ms-4">
+                    <div class="col-md-4 mb-3">
+                        <label for="ManagerName" class="form-label fw-bold">Representative / Manager  Name <span class="text-danger">*</span></label>
+                        @Html.TextBox("ManagerName", Model?.ManagerName, new { @class = "form-control readonly-field", placeholder = "Enter theater name", required = "required" })
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+                        <label for="TEmail" class="form-label fw-bold">Email ID <span class="text-danger">*</span></label>
+                        @*@Html.TextBoxFor(m => m.T_OWNER_EMAIL, new { @class = "form-control readonly-field", placeholder = "Enter email ID", required = "required" })*@
+                        @Html.TextBox("TEmail", Model?.TEmail, new { @class = "form-control readonly-field", placeholder = "Enter theater name", required = "required" })
+
+                    </div>
+                </div>
+
+                <div class="row ms-4">
+                    <div class="col-md-8 mb-3">
+                        <label for="TAddress" class="form-label fw-bold required-field">Theatre Address </label>
+                        @*@Html.TextAreaFor(m => m.T_ADDRESS, new { @class = "form-control readonly-field", rows = "1", style = "max-width:92%", placeholder = "Enter theater address", required = "required" })*@
+                        @Html.TextBox("TAddress", Model?.TAddress, new { @class = "form-control readonly-field", placeholder = "Enter theater name", required = "required", style = "max-width: 92%;" })
+
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="TCity" class="form-label fw-bold">City <span class="text-danger">*</span></label>
+                        @*@Html.TextBoxFor(m => m.T_CITY, new { @class = "form-control readonly-field ddrread", placeholder = "Enter city", required = "required" })*@
+                        @Html.TextBox("TCity", Model?.TCity, new { @class = "form-control readonly-field", placeholder = "Enter theater name", required = "required" })
+
+                    </div>
+                </div>
+                <div class="row ms-4">
+                    <div class="col-md-4 mb-3">
+                        <label for="TCommencementDate" class="form-label fw-bold">Theatre Commencement Date <span class="text-danger">*</span></label>
+                        @Html.TextBox("TCommencementDate", Model?.TCommencementDate?.ToString("yyyy-MM-dd"), new { @class = "form-control readonly-field", type = "date", required = "required" })
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label for="LicenseDate" class="form-label fw-bold">License Date <span class="text-danger">*</span></label>
+                        @*@Html.TextBoxFor(m => m.LICENSE_DATE, "{0:yyyy-MM-dd}", new { @class = "form-control readonly-field", type = "date" })*@
+                        @Html.TextBox("LicenseDate", Model?.LicenseDate?.ToString("yyyy-MM-dd"), new { @class = "form-control readonly-field", type = "date", required = "required" })
+
+
+                    </div>
+                </div>
+
+
+                <!-- City, Zone, Ward -->
+                <div class="row ms-4 align-items-end">
+                    <div class="col-md-4">
+                        <label for="TTenamentNo" class="form-label fw-bold">AMC Property Tax Tenement No <span class="text-danger">*</span></label>
+                        @Html.TextBox("TTenamentNo", Model?.TTenamentNo, new { @class = "form-control readonly-field", placeholder = "Enter theater name", required = "required" })
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="TZone" class="form-label fw-bold">Zone <span class="text-danger">*</span></label>
+                        @Html.DropDownList("TZone", new SelectList(new[] { "Zone1", "Zone2", "Zone3", "Zone4" }, Model?.TZone),
+                            "-- Select Zone --", new { @class = "form-control readonly-field ddrread" })
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="TWard" class="form-label fw-bold">Ward <span class="text-danger">*</span></label>
+                        @Html.DropDownList("TWard", new SelectList(new[] { "Ward1", "Ward2", "Ward3", "Ward4" }, Model?.TWard),
+                            "-- Select Ward Zone --", new { @class = "form-control readonly-field" })
+                    </div>
+                </div>
+
+                <!-- Tax Details -->
+                <div class="row ms-4 align-items-end">
+                    <div class="col-md-4">
+                        <label for="TPecNo" class="form-label fw-bold mt-3">AMC Professional Tax PEC No</label><span class="text-danger">*</span>
+                        @Html.TextBox("TPecNo", Model?.TPecNo, new { @class = "form-control readonly-field", placeholder = "PEC No" })
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="TPrcNo" class="form-label fw-bold">PRC No</label>
+                        @Html.TextBox("TPrcNo", Model?.TPrcNo, new { @class = "form-control readonly-field", placeholder = "PRC No" })
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="PropertyType" class="form-label fw-bold">Property Type</label><span class="text-danger">*</span>
+                        @Html.DropDownList("PropertyType",
+                        new List<SelectListItem>
+                        {
+                            new SelectListItem { Text = "-- Select --", Value = "" },
+                            new SelectListItem { Text = "Self", Value = "Self" },
+                            new SelectListItem { Text = "Tenant", Value = "Tenant" }
+                        },
+                        new { @class = "form-control" })
+                    </div>
+                </div>
+
+                <!-- Tax Payment -->
+                <div class="row ms-4 align-items-end">
+                    <div class="col-12 fw-bold">
+                        <label for="TTaxPayingOffline" class="form-label fw-bold mt-3">
+                            Already Paying Theater Tax Offline <span class="text-danger">*</span>
+                        </label>
+
+                        <div class="form-check d-inline-block me-3">
+                            @Html.RadioButton("TTaxPayingOffline", "1", Model?.TTaxPayingOffline == 1,
+                                new { @class = "form-check-input", id = "yes", required = "required" })
+                            <label for="yes" class="form-check-label">Yes</label>
+                        </div>
+
+                        <div class="form-check d-inline-block">
+                            @Html.RadioButton("TTaxPayingOffline", "0", Model?.TTaxPayingOffline == 0,
+                                new { @class = "form-check-input", id = "no", required = "required" })
+                            <label for="no" class="form-check-label">No</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ✅ Offline Tax Payment Section -->
+                <div id="OFFLINE_TAX_PAYMENT" class="ms-4" style="display: none;">
+                    <div class="row align-items-end">
+                        <div class="col-md-4">
+                            <label for="offlineTaxPaidMonth" class="form-label fw-bold ms-3">Latest Month</label>
+                            <input type="month" id="offlineTaxPaidMonth" name="OfflineTaxPaidMonth" class="form-control ms-3">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="OfflineTaxPaidYear" class="form-label fw-bold ms-2">Offline Tax Due Year <span class="text-danger">*</span></label>
+                            @Html.DropDownList("OfflineTaxPaidYear", Enumerable.Range(DateTime.Now.Year - 50, 51)
+                                .Select(y => new SelectListItem { Text = y.ToString(), Value = y.ToString() }),
+                                "-- Select Year --",
+                                new { @class = "form-control ms-2" })
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="offlineTaxPayment" class="form-label fw-bold ms-2">Amount (Rs.)</label>
+                            @Html.TextBox("OfflineTaxPayment", Model?.OfflineTaxPayment, new { @class = "form-control ms-1", placeholder = "Offline Tax Payment" })
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+
+                <!-- Grid Table for Screen Capacity -->
+                <table id="screenCapacityTable" class="table table-bordered text-center mt-3 me-5">
+                    <thead>
+                        <tr>
+                            <th>Screen No</th>
+                            <th>Seat Capacity</th>
+                            <th>Screen Type</th>
+                            <th class="HideAtDept">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="screenTableBody">
+                        @if (screenList != null && screenList.Count > 0)  // ✅ Ensure screens exist
+                        {
+                            for (int screenNo = 0; screenNo < screenList.Count; screenNo++)
+                            {
+                                <tr>
+                                    <td>
+                                        <input type="hidden" name="NO_OF_SCREENS[@screenNo].ApplId" value="@screenList[screenNo].ApplId">
+                                        <input type="text" name="NO_OF_SCREENS[@screenNo].ScreenNo" class="form-control ms-4"
+                                               value="@screenList[screenNo].ScreenNo">
+                                    </td>
+
+                                    <td>
+                                        <input type="number" name="NO_OF_SCREENS[@screenNo].AudienceCapacity" class="form-control readonly-field text-end"
+                                               value="@screenList[screenNo].AudienceCapacity" required oninput="updateScreenType(this)">
+                                    </td>
+                                    <td>
+                                        <input type="text" name="NO_OF_SCREENS[@screenNo].ScreenType" class="form-control ms-4"
+                                               value="@screenList[screenNo].ScreenType" readonly>
+                                    </td>
+                                    <td class="HideAtDept">
+                                        <button type="button" class="btn btn-primary me-2" onclick="addScreen()" title="Add Screen">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-danger me-2" onclick="removeRow(this)" title="Delete Screen">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <!-- ✅ Show an Empty Row When No Screens Exist -->
+                            <tr>
+                                <td>
+                                    <input type="hidden" name="NO_OF_SCREENS[0].ApplId" value="@Model.ApplId">
+                                    <input type="text" name="NO_OF_SCREENS[0].ScreenNo" class="form-control ms-4" placeholder="Enter Screen No">
+                                </td>
+
+                                <td>
+                                    <input type="number" name="NO_OF_SCREENS[0].AudienceCapacity" class="form-control text-end"
+                                           placeholder="Enter Capacity" required oninput="updateScreenType(this)">
+                                </td>
+
+                                <td>
+                                    <input type="text" name="NO_OF_SCREENS[0].ScreenType" class="form-control ms-4" placeholder="Auto-filled" readonly>
+                                </td>
+
+                                <td class="HideAtDept">
+                                    <button type="button" class="btn btn-primary me-2" onclick="addScreen()" title="Add Screen">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-danger me-2" onclick="removeRow(this)" title="Delete Screen">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+
+
+
+                <h2 class="text-bg-light p-2">Upload Required Documents:</h2>
+
+                <div class="row">
+
+                    <div class="col-md-12 me-5">
+                        <table class="table table-bordered table-striped me-5">
+                            <thead>
+                                <tr>
+                                    <th class="fw-bold">Document Name</th>
+                                    <th class="fw-bold">Document Type</th>
+                                    <th class="fw-bold">Allowed Size (MB)</th>
+                                    <th class="fw-bold">Uploaded Size (MB)</th>
+                                    <th class="fw-bold HideAtDept">Upload</th>
+                                    <th class="fw-bold">View</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var doc in documentList)
+                                {
+                                    var uploadedDoc = uDocs.FirstOrDefault(d => d.DocId == doc.DocId);
+                                    string filePath = uploadedDoc?.DocFilePath ?? string.Empty;
+
+                                    <tr>
+                                        <td>@doc.DocName</td>
+                                        <td>@doc.FILE_TYPE</td>
+                                        <td>@doc.FILE_SIZE_MB MB</td>
+                                        <td id="size-@doc.DocId">@(filePath != "" ? GetFileSize(filePath) + " MB" : "0 MB")</td>
+
+                                        <td class="HideAtDept">
+                                            <input type="file"
+                                                   class="form-control"
+                                                   id="file-@doc.DocId"
+                                                   name="documents"
+                                                   accept=".pdf,.jpg,.png,.docx"
+                                                   onchange="updateFileSize('@doc.DocId'); showViewButton('@doc.DocId', this)" />
+                                        </td>
+
+                                        <td id="viewBtn-@doc.DocId">
+                                            @if (!string.IsNullOrEmpty(filePath))
+                                            {
+                                                <a href="@Url.Content("~/UploadedFiles/" + Path.GetFileName(filePath))"
+                                                   target="_blank"
+                                                   class="btn btn-primary btn-sm">View</a>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Not Available</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+
+
+                        </table>
+                    </div>
+
+
+                </div>
+
+
+
+
+
+
+
+                <div class="text-start">
+
+
+                    @if (ViewBag.Mode == "create")
+                    {
+                        <div class="form-check mt-3">
+
+                            <label class="form-check-label fw-bold text-muted">
+                                <span class="text-danger  fw-bold me-1">*</span> <!-- Asterisk before checkbox -->
+                                <input class="form-check-input  ms-1" type="checkbox" id="theatreTaxDeclaration" name="THEATRE_TAX_DECLARATION" required>
+                                I hereby declare that all the above-mentioned information is true as per my knowledge and belief. By owning theatre/Video theatre premises in the city limits of AMC,
+                                I am liable to pay show tax as per the rules and regulations. In default of the same / for any erroneous information,
+                                I will be held responsible for any penalty action taken by AMC.
+                            </label>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-success mt-4 w-25">Submit</button>
+                        </div>
+                    }
+                    else if (ViewBag.Mode == "edit")
+                    {
+                        <button type="submit" class="btn btn-success" onclick="enableEditMode()">Update</button>
+
+                        <button type="button" class="btn btn-warning" onclick="location.href='@Url.Action("List_of_Application", "Home")'">Cancel</button>
+                    }
+                    else if (ViewBag.Mode == "view")
+                    {
+
+                        <button type="button" class="btn btn-secondary" onclick="window.history.back()">Back</button>
+                    }
+                    else if (ViewBag.Mode == "approve")
+                    {
+                        ViewBag.ShowBasicNavbar = false;
+                        ViewBag.ShowNavbar = true;
+                        ViewBag.ShowSideBar = false;
+                        ViewBag.ShowSideBar1 = true;
+                        ViewBag.Login = false;
+                        ViewBag.ShowHomeIcon = true;
+                        ViewBag.Module = true;
+                        ViewBag.IsViewPAge = true;
+                        @*@Html.HiddenFor(m => m.T_ID)*@
+
+                        <input type="hidden" id="actionType" name="actionType" />
+                        <input type="hidden" id="rejectReasonInput" name="rejectReason" />
+
+                        <button type="submit" class="btn btn-success" onclick="setAction('Approve')">
+                            <i class="fa fa-check"></i> Approve
+                        </button>
+
+                        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#rejectModal">
+                            <i class="fa fa-times"></i> Reject
+                        </button>
+
+                        <div class="modal fade" id="rejectModal" tabindex="-1" role="dialog">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Provide a Reason for Rejection</h5>
+                                        <button type="button" class="btn btn-light" data-dismiss="modal">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+
+                                    </div>
+                                    <div class="modal-body">
+                                        <textarea id="rejectReason" class="form-control" rows="4" placeholder="Enter reason here..." style="max-width:100%;"></textarea>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-danger" onclick="setAction('Reject')">Reject</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else if (ViewBag.Mode == "back" && ViewBag.IsViewPAge == true)
+                    {
+
+                        ViewBag.IsViewPAge = true;
+                        <button type="button" class="btn btn-secondary" onclick="window.history.back()">Back</button>
+                    }
+
+                    <!-- Reject Reason Modal -->
+                    <div class="modal fade" id="rejectModal" tabindex="-1" role="dialog" aria-labelledby="rejectModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="rejectModalLabel">Please Provide a Reason for Rejection</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <textarea id="rejectReason" class="form-control" rows="4" placeholder="Enter reason here..."></textarea>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-danger" onclick="submitRejection()">Reject</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            }
+</body>
+</html>
+</html>
+
+
+@*SCRIPT*@
+@*Year Script*@
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let currentYear = new Date().getFullYear();
+        let dropdown = document.getElementById("offlineDueYear");
+        let storedYear = "@(Model?.OfflineTaxPaidYear?.Year ?? DateTime.Now.Year)"; // Default to current year if null
+        storedYear = parseInt(storedYear, 10); // Ensure it's an integer
+
+        if (dropdown) {
+            for (let i = currentYear; i >= currentYear - 50; i--) {
+                let option = document.createElement("option");
+                option.value = i;
+                option.textContent = i;
+                if (i === storedYear) {
+                    option.selected = true;
+                }
+                dropdown.appendChild(option);
+            }
+
+            function updateDueDate() {
+                let selectedYear = dropdown.value;
+                document.getElementById("offlineDueDate").value = selectedYear ? `${selectedYear}-01-01` : "";
+            }
+
+            dropdown.addEventListener("change", updateDueDate);
+            updateDueDate(); // Initialize hidden field on page load
+        }
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let storedDate = "@(Model?.OfflineTaxPaidMonth?.ToString("yyyy-MM-dd") ?? "")";
+        let selectedMonth = storedDate ? storedDate.split("-")[1] : "";
+        let selectedYear = storedDate ? storedDate.split("-")[0] : new Date().getFullYear();
+
+        let monthDropdown = document.getElementById("offlineTaxPaidMonth");
+        let hiddenDateField = document.getElementById("offlineTaxPaidDate");
+
+        if (monthDropdown) {
+            if (selectedMonth) {
+                monthDropdown.value = selectedMonth;
+            }
+
+            function updateHiddenField() {
+                let selectedMonth = monthDropdown.value;
+                if (selectedMonth) {
+                    hiddenDateField.value = `${selectedYear}-${selectedMonth}-01`;
+                }
+            }
+
+            monthDropdown.addEventListener("change", updateHiddenField);
+            updateHiddenField(); // Initialize hidden field on page load
+        }
+    });
+</script>
+
+
+@functions {
+    public string GetFileSize(string filePath)
+    {
+        string fullPath = HttpContext.Current.Server.MapPath("~/UploadedFiles/" + Path.GetFileName(filePath));
+        if (System.IO.File.Exists(fullPath))
+        {
+            long fileSize = new System.IO.FileInfo(fullPath).Length;
+            return (fileSize / (1024.0 * 1024.0)).ToString("0.##");
+        }
+        return "0";
+    }
+}
+<!-- Hidden input to store screen data -->
+<script>
+    function addScreen() {
+        debugger;
+        const tableBody = document.querySelector("#screenTableBody"); // Ensure tbody selection
+        if (!tableBody) {
+            console.error("Table body not found!");
+            return;
+        }
+
+        const rows = tableBody.getElementsByTagName("tr");
+
+        if (rows.length === 0) return; // If no rows exist, do nothing
+
+        if (rows.length >= 10) {
+            alert("Maximum 10 screens can be added.");
+            return;
+        }
+
+        // Validate if all fields in the last row are filled
+        const lastRow = rows[rows.length - 1];
+        const inputs = lastRow.querySelectorAll("input");
+
+        for (let input of inputs) {
+            if (input.value.trim() === "") {
+                showErrorMessage(input, "This field is required.");
+
+                // Attach event listener to remove error on input change
+                input.addEventListener("input", function () {
+                    if (input.value.trim() !== "") {
+                        clearErrorMessage(input);
+                    }
+                });
+
+                return;
+            }
+        }
+
+        // Clone the first row to maintain consistency
+        const lastIndex = rows.length; // Get new row index
+        const newRow = rows[0].cloneNode(true);
+
+        // Update input names and clear values
+        newRow.querySelectorAll("input").forEach(input => {
+            if (input.name) {
+                input.name = input.name.replace(/\d+/, lastIndex); // Update index
+                if (input.type !== "hidden") input.value = ""; // Clear values except hidden fields
+            }
+        });
+
+        // Attach validation events
+        newRow.querySelectorAll("input").forEach(input => {
+            input.addEventListener("input", function () {
+                validateInput(input);
+            });
+        });
+
+        tableBody.appendChild(newRow);
+    }
+
+
+    function removeRow(button) {
+        const tableBody = document.querySelector("#screenTableBody");
+        const rows = tableBody.getElementsByTagName("tr");
+
+        if (rows.length === 1) {
+            alert("At least one screen entry must be present.");
+            return;
+        }
+
+        var row = button.parentNode.parentNode;
+        row.parentNode.removeChild(row);
+
+        // If no rows are left, add a new blank row automatically
+        if (tableBody.getElementsByTagName("tr").length === 0) {
+            addScreen();
+        }
+    }
+
+
+    function editRow(button) {
+        var row = button.parentNode.parentNode;
+        var seatCapacityInput = row.cells[1].querySelector("input");
+        seatCapacityInput.removeAttribute("readonly");
+    }
+
+    function updateScreenType(input) {
+        debugger;
+        var seatCapacity = input.value.trim();
+        var row = input.parentNode.parentNode;
+        var screenTypeInput = row.cells[2].querySelector("input");
+
+        if (!seatCapacity || isNaN(seatCapacity)) {
+            showErrorMessage(input, "Please enter a valid seat capacity.");
+            input.value = "";
+            return;
+        }
+
+        clearErrorMessage(input);
+
+        if (parseInt(seatCapacity) > 125) {
+            screenTypeInput.value = "Theater";
+        } else {
+            screenTypeInput.value = "Video";
+        }
+    }
+
+    function validateInput(input) {
+        if (input.name.includes("SCREEN_NO")) {
+            validateScreenNumber(input);
+        } else if (input.name.includes("AUDIENCE_CAPACITY")) {
+            updateScreenType(input);
+        }
+    }
+
+    function validateScreenNumber(input) {
+        const enteredNumber = input.value.trim();
+        const existingScreenNumbers = [...document.querySelectorAll('input[name*=".SCREEN_NO"]')]
+            .map(inp => inp.value.trim())
+            .filter(value => value !== "");
+
+        if (existingScreenNumbers.filter(num => num === enteredNumber).length > 1) {
+            showErrorMessage(input, "Duplicate screen number is not allowed.");
+        } else if (enteredNumber !== "") {
+            clearErrorMessage(input); // ✅ Remove error when a valid number is entered
+        }
+    }
+
+    function showErrorMessage(input, message) {
+        let errorElement = input.nextElementSibling;
+        if (!errorElement || !errorElement.classList.contains("error-message")) {
+            errorElement = document.createElement("div");
+            errorElement.classList.add("error-message");
+            errorElement.style.color = "red";
+            errorElement.style.fontSize = "12px";
+            errorElement.style.marginTop = "2px";
+            input.parentNode.appendChild(errorElement);
+        }
+        errorElement.textContent = message;
+    }
+
+    function clearErrorMessage(input) {
+        const errorElement = input.nextElementSibling;
+        if (errorElement && errorElement.classList.contains("error-message")) {
+            errorElement.remove();
+        }
+    }
+
+</script>
+
+
+@*offlineTax*@
+
+<script>
+function makeDropdownReadonly(className) {
+    let elements = document.querySelectorAll("." + className);
+    elements.forEach(el => {
+        el.addEventListener("mousedown", function (event) {
+            event.preventDefault(); // Prevents opening the dropdown
+        });
+
+        el.style.backgroundColor = "#e9ecef"; // Light gray background (like readonly)
+        el.style.pointerEvents = "none"; // Prevents clicking
+        el.style.opacity = "1"; // Ensures visibility
+        el.style.color = "#495057"; // Matches text color of readonly input
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    @if (ViewBag.IsViewPage == true) {
+        @:makeDropdownReadonly("readonly-field");
+    }
+});
+</script>
+
+
+<script>
+    // Assuming these values come from the server-side and are already available in registrationData
+    var offlineTaxPaidDate = registrationData.OFFLINE_TAX_PAID_DATE;
+    var offlineDueDate = registrationData.OFFLINE_DUE_DATE;
+
+    // Set the values of the input fields with the correct date format
+    document.getElementById('offlineTaxPaidDate').value = offlineTaxPaidDate ? offlineTaxPaidDate.toISOString().split('T')[0] : '';
+    document.getElementById('offlineDueDate').value = offlineDueDate ? offlineDueDate.toISOString().split('T')[0] : '';
+</script>
+
+@*offlineTax button yes and no*@
+<script>
+    // Function to toggle visibility of #offlineTaxDetails
+    function toggleFields(isOffline) {
+        const offlineTaxDetails = document.getElementById('offlineTaxDetails');
+
+        // Show the section if "Yes" is selected; hide it otherwise
+        if (isOffline) {
+            offlineTaxDetails.style.display = 'block';
+        } else {
+            offlineTaxDetails.style.display = 'none';
+        }
+    }
+
+    // Attach event listener on DOMContentLoaded for initialization
+    document.addEventListener('DOMContentLoaded', () => {
+        const yesRadio = document.getElementById('yes');
+        const noRadio = document.getElementById('no');
+        const offlineTaxDetails = document.getElementById('OFFLINE_TAX_PAYMENT'); // ✅ Correct ID
+
+        function toggleFields(isOffline) {
+            offlineTaxDetails.style.display = isOffline ? 'block' : 'none';
+        }
+
+        // ✅ Initialize visibility based on selected value
+        toggleFields(yesRadio.checked);
+
+        // ✅ Ensure change event works properly
+        yesRadio.addEventListener('change', () => toggleFields(true));
+        noRadio.addEventListener('change', () => toggleFields(false));
+    });
+
+</script>
+
+
+@*JavaScript to Hide Elements*@
+<script>
+function hideElementsByClass(HideAtDept) {
+    let elements = document.querySelectorAll("." + HideAtDept);
+    elements.forEach(el => el.style.display = "none");
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    @if (ViewBag.IsViewPage == true) // If condition is true, call the function
+    {
+        @:hideElementsByClass("HideAtDept");
+    }
+});
+</script>
+
+
+@*update document File Size*@
+<script>
+    function updateFileSize(docId) {
+        const inputElement = document.getElementById(`file-${docId}`);
+        const sizeElement = document.getElementById(`size-${docId}`);
+
+        if (inputElement.files.length > 0) {
+            // Get file size in bytes
+            const fileSizeBytes = inputElement.files[0].size;
+
+            // Convert to MB
+            const fileSizeMB = (fileSizeBytes / (1024 * 1024)).toFixed(2);
+
+            // Update size column
+            sizeElement.textContent = `${fileSizeMB} MB`;
+
+            // Validate file size (Max: 5 MB)
+            if (fileSizeMB > 5) {
+                alert("The selected file exceeds the maximum allowed size of 5 MB. Please select a smaller file.");
+                inputElement.value = ""; // Clear input
+                sizeElement.textContent = "0 MB"; // Reset size
+            }
+        } else {
+            sizeElement.textContent = "0 MB";
+        }
+    }
+
+    function showViewButton(docId, input) {
+        if (input.files.length > 0) {
+            let file = input.files[0];
+            let fileURL = URL.createObjectURL(file);
+
+            document.getElementById(`viewBtn-${docId}`).innerHTML =
+                `<a href='${fileURL}' target='_blank' class='btn btn-primary btn-sm'>View</a>`;
+        }
+    }
+</script>
+
+@*Edit readonly-field *@
+<script>
+    function enableEditMode() {
+        // Select all fields with the class "readonly-field" and remove the readonly attribute
+        document.querySelectorAll(".readonly-field").forEach(field => {
+            field.removeAttribute("readonly");
+        });
+
+        // Optionally focus on the first input field after enabling edit mode
+        document.querySelector(".readonly-field")?.focus();
+    }
+</script>
+@*rejectReason*@
+<script>
+    function setAction(actionType) {
+        document.getElementById("actionType").value = actionType;
+
+        if (actionType === "Reject") {
+            var reason = document.getElementById("rejectReason").value.trim();
+            if (reason === "") {
+                alert("Please provide a reason for rejection.");
+                return;
+            }
+            document.getElementById("rejectReasonInput").value = reason;
+        } else {
+            document.getElementById("rejectReasonInput").value = ""; // Clear reason if approved
+        }
+
+        setTimeout(() => {
+            document.getElementById("TheaterForm").submit();
+        }, 500);
+    }
+</script>
+
+@*Keep fields readonly for update*@
+<script>
+     document.addEventListener("DOMContentLoaded", function () {
+        let isViewPage = @Html.Raw(Json.Encode(isViewPage));
+
+        if (isViewPage) {
+            // Keep fields readonly in Approve/Reject mode
+            document.querySelectorAll(".readonly-field").forEach(field => {
+                field.readOnly = true;
+            });
+        } else {
+            // Allow editing if not in Approve/Reject mode
+            document.getElementById("updateBtn")?.addEventListener("click", function () {
+                document.querySelectorAll(".readonly-field").forEach(field => {
+                    field.removeAttribute("readonly");
+                });
+            });
+        }
+    });
+</script>
+
+@*rejectReasonInput*@
+<script>
+    function submitRejection() {
+        var reason = document.getElementById("rejectReason").value;
+
+        if (reason != "") {
+            // Close the modal
+            $('#rejectModal').modal('hide');
+
+            // Set the action to "Reject" and submit the form
+            document.getElementById("action").value = "Reject";
+            document.getElementById("rejectReasonInput").value = reason;
+            document.getElementById("TheaterForm").submit(); // Replace "yourFormId" with the actual ID of your form
+        } else {
+            alert("Please provide a reason for rejection.");
+        }
+    }
+</script>
+
+@*TO ADD/REMOVE REQUIRED *@
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll("[required]").forEach(input => {
+            let label = document.querySelector("label[for='" + input.id + "']");
+            if (label && !label.innerHTML.includes("*")) {
+                label.innerHTML += ' <span class="text-danger">*</span>';
+            }
+        });
+    });
+</script>
+
+
+
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

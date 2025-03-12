@@ -1,0 +1,206 @@
+﻿@model IEnumerable<AMC_THEATER_1.Models.TheaterViewModel>
+
+@{
+    ViewBag.Title = "AllReceipt";
+    ViewBag.ShowBasicNavbar = false;
+    ViewBag.ShowHomeIcon = true;
+    ViewBag.Module = true;
+    ViewBag.ShowNavbar = true;
+    ViewBag.ShowSideBar = true;
+}
+
+<style>
+    .container {
+        margin-left: 160px; /* Set this to match the sidebar width */
+        transition: margin-left 0.3s;
+        padding: 15px;
+    }
+</style>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+</head>
+<body>
+
+    <div class="container me-5 pe-5 justify-content-center">
+        <div class="w-100 pe-5">
+            <div class="me-5">
+                <h2 class="mb-1 me-5 bg-light p-3 text-center">Receipt</h2>
+            </div>
+
+            <div class="me-5">
+                <div class="me-5">
+                    <!-- Filter Form -->
+                    <form id="filterForm" class="p-3 border border-dark bg-light" method="get" action="@Url.Action("AllReceipt", "Home")">
+                        <div class="row g-3">
+                            <!-- Theater ID -->
+                            <div class="col-md-3">
+                                <label for="theaterId" class="fw-bold text-dark" style="font-size: 14px;">Theater ID:</label>
+                                <input type="text" id="theaterId" name="theaterId" class="form-control form-control-sm" value="@Request.QueryString["theaterId"]" />
+                            </div>
+
+                            <!-- From Date -->
+                            <div class="col-md-3">
+                                <label for="fromDate" class="fw-bold text-dark" style="font-size: 14px;">From Date:</label>
+                                <input type="date" id="fromDate" name="fromDate" class="form-control form-control-sm"
+                                       value="@Request.QueryString["fromDate"]" />
+                            </div>
+
+                            <!-- To Date -->
+                            <div class="col-md-3">
+                                <label for="toDate" class="fw-bold text-dark" style="font-size: 14px;">To Date:</label>
+                                <input type="date" id="toDate" name="toDate" class="form-control form-control-sm"
+                                       value="@Request.QueryString["toDate"]" />
+                            </div>
+
+                            <!-- Status -->
+                            <div class="col-md-3">
+                                <label for="statusFilter" class="fw-bold text-dark" style="font-size: 14px;">Status:</label>
+                                <select id="statusFilter" name="statusFilter" class="form-control form-control-sm">
+                                    <option value="">All</option>
+                                    <option value="Pending" @(Request.QueryString["statusFilter"] == "Pending" ? "selected" : "")>Pending</option>
+                                    <option value="Completed" @(Request.QueryString["statusFilter"] == "Completed" ? "selected" : "")>Completed</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-flex gap-2 mt-3">
+                            <button type="submit" class="btn btn-primary btn-sm" data-bs-toggle="tooltip" title="Apply Filters">
+                                <i class="bi bi-funnel"></i> Submit
+                            </button>
+
+                            <!-- Reset Button -->
+                            <button type="button" id="resetButton" class="btn btn-secondary btn-sm" title="Reset Filters" onclick="resetForm()">
+                                <i class="fa fa-refresh"></i> Reset
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Theater Table -->
+                    <table class="table table-bordered mt-5 table-striped">
+                        <thead>
+                            <tr>
+                                <th class="fw-bold">Theater ID</th>
+                                <th class="fw-bold">Theater Name</th>
+                                <th class="fw-bold">City</th>
+                                <th class="fw-bold">Ward</th>
+                                <th class="fw-bold">Zone</th>
+                                <th class="fw-bold">Address</th>
+                                <th class="fw-bold">Tenament Number</th>
+                                <th class="fw-bold">Status</th>
+                                <th class="fw-bold">Since Month</th>
+                                <th class="fw-bold">Receipt</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.Any())
+                            {
+                                foreach (var theater in Model)
+                                {
+                                    <tr id="theater-@theater.T_ID">
+                                        <td>@theater.T_ID</td>
+                                        <td>@theater.T_NAME</td>
+                                        <td>@theater.T_CITY</td>
+                                        <td>@theater.T_WARD</td>
+                                        <td>@theater.T_ZONE</td>
+                                        <td>@theater.T_ADDRESS</td>
+                                        <td>@theater.T_TENAMENT_NO</td>
+                                        <td class="@(theater.PAYMENT_STATUS == "Paid" ? "text-success fw-bold" : "text-danger fw-bold")">
+                                            @theater.PAYMENT_STATUS
+                                        </td>
+                                        <td>@theater.SINCE_MONTH</td>
+                                        <td>
+                                            @if (theater.PAYMENT_STATUS == "Paid")
+                                            {
+                                                <a href="@Url.Action("Receipt", "Home", new { theaterId = theater.T_ID })"
+                                                   class="btn btn-secondary btn-sm" data-bs-toggle="tooltip" title="View Receipt">
+                                                    <i class="bi bi-receipt"></i> Receipt
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">N/A</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="10" class="text-center">No theater data available.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Form JavaScript -->
+    <script>
+        function resetForm() {
+            document.getElementById("theaterId").value = "";
+            document.getElementById("fromDate").value = "";
+            document.getElementById("toDate").value = "";
+            document.getElementById("statusFilter").value = "";
+            document.getElementById("filterForm").submit();
+        }
+    </script>
+
+
+</body>
+</html>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.getElementById("fromDate").addEventListener("input", function () {
+            validateYear(this);
+        });
+
+        document.getElementById("toDate").addEventListener("input", function () {
+            validateYear(this);
+        });
+
+        function validateYear(input) {
+            let value = input.value;
+            let year = value.split("-")[0]; // Extract the year part
+
+            if (year.length > 4) {
+                input.value = value.substring(0, 4) + value.substring(5); // Limit year to 4 digits
+            }
+        }
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let today = new Date();
+        let firstDay = new Date(today.getFullYear(), today.getMonth(), 1); // 1st day of the current month
+
+        let formatDate = (date) => {
+            let year = date.getFullYear();
+            let month = (date.getMonth() + 1).toString().padStart(2, '0'); // Ensure 2-digit month
+            let day = date.getDate().toString().padStart(2, '0'); // Ensure 2-digit day
+            return `${year}-${month}-${day}`;
+        };
+
+        let fromDateInput = document.getElementById("fromDate");
+        let toDateInput = document.getElementById("toDate");
+
+        // Only set default values if fields are empty (i.e., first time loading the page)
+        if (!fromDateInput.value) {
+            fromDateInput.value = formatDate(firstDay);
+        }
+        if (!toDateInput.value) {
+            toDateInput.value = formatDate(today);
+        }
+    });
+
+</script>

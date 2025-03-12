@@ -1,0 +1,24 @@
+﻿@model IEnumerable<AMC_THEATER_1.Models.TheaterViewModel>
+@{
+    ViewBag.CurrentAction = "List of Application";
+
+    ViewBag.Title = "List";
+    ViewBag.ShowBasicNavbar = false; // Show only the basic navbar
+    ViewBag.ShowHomeIcon = true;
+    ViewBag.Module = true;
+
+    ViewBag.ShowNavbar = true;
+    ViewBag.ShowSideBar = true;
+}
+
+
+@if (ViewBag.Message != null)
+{
+    <div class="alert alert-warning">@ViewBag.Message</div>
+}
+<div class="fw-bold">
+    <h1 class="text-center bg-light p-3 pe-5 w-100">Registration Application Status</h1>
+</div>
+
+<!-- Use the Common Table View -->
+@Html.Partial("CommonTableView", Model)
