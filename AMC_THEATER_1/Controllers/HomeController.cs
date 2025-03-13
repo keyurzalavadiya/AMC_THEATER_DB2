@@ -20,57 +20,36 @@ namespace Amc_theater.Controllers
 {
     public class HomeController : Controller
     {
-
-        //private  THEATER_MODULEEntities1 db = new THEATER_MODULEEntities1();
-
-        //ApplicationDbContext db1 = new ApplicationDbContext(); // Database context
         readonly ApplicationDbContext db = new ApplicationDbContext(); // Ass
         DB2Connection db1 = new DB2Connection("Database=prddb1;uid=prdinst1;pwd=prdinst1;Server=123.63.211.14:50000;");
-
         public ActionResult List_of_Application()
         {
             ViewBag.CurrentAction = "List of Application"; // ✅ Important for UI
-
             List<TheaterViewModel> theaterList = new List<TheaterViewModel>();
-
             try
             {
-                db1.Open(); // ✅ Open DB2 connection
-
                 var query = from tr in db.TRN_REGISTRATION
-                            where tr.TActive == 1
-                            select new
-                            {
-                                tr.TId,
-                                tr.ApplId,
-
-                                //tr.RegId,
-                                tr.TName,
-                                tr.TCity,
-                                tr.TAddress,
-                                tr.TTenamentNo,
-                                tr.TZone,
-                                tr.TWard,
-                                tr.TStatus,
-                                tr.RejectReason,
-                                tr.UpdateDate,
-                                tr.TCommencementDate,
-
-                                //TheaterScreenCount = (from s in db1.NO_OF_SCREENS
-                                //                      where s.ApplId == tr.ApplId && s.ScreenType == "Theater"
-                                //                      select s.ScreenId).Count(),
-                                //VideoTheaterScreenCount = (from s in db1.NO_OF_SCREENS
-                                //                           where s.ApplId == tr.ApplId && s.ScreenType == "Video"
-                                //                           select s.ScreenId).Count(),
-                            };
-
+                      where tr.TActive == 1
+                      select new
+                      {
+                          tr.TId,
+                          tr.ApplId,
+                          tr.TName,
+                          tr.TCity,
+                          tr.TAddress,
+                          tr.TTenamentNo,
+                          tr.TZone,
+                          tr.TWard,
+                          tr.TStatus,
+                          tr.RejectReason,
+                          tr.UpdateDate,
+                          tr.TCommencementDate,
+                      };
                 var result = query.ToList();
-
                 theaterList = result.Select(tr => new TheaterViewModel
                 {
                     T_ID = tr.TId,
                     ApplId = tr.ApplId,
-                    //REG_ID = tr.RegId,
                     T_NAME = tr.TName,
                     T_CITY = tr.TCity,
                     T_ADDRESS = tr.TAddress,
@@ -81,32 +60,24 @@ namespace Amc_theater.Controllers
                     REJECT_REASON = tr.RejectReason,
                     T_COMMENCEMENT_DATE = tr.TCommencementDate ?? DateTime.MinValue,
                     UPDATE_DATE = tr.UpdateDate ?? DateTime.MinValue,
-                    //SCREEN_COUNT = tr.TheaterScreenCount + tr.VideoTheaterScreenCount,
-                    //THEATER_SCREEN_COUNT = tr.TheaterScreenCount,
-                    //VIDEO_THEATER_SCREEN_COUNT = tr.VideoTheaterScreenCount
                 }).ToList();
             }
             catch (Exception ex)
             {
                 // 🔴 Log the detailed error, including inner exceptions
-                var errorMessage = $"Edit Error: {ex.Message}";
+                 var errorMessage = $"Edit Error: {ex.Message}";
                 if (ex.InnerException != null)
                 {
                     errorMessage += $" | Inner Exception: {ex.InnerException.Message}";
                 }
-
                 // Log to a file or database (replace with your logger)
-                System.Diagnostics.Debug.WriteLine(errorMessage);
-
+                 System.Diagnostics.Debug.WriteLine(errorMessage);
                 TempData["ErrorMessage"] = "An error occurred while processing your request. Please try again later.";
                 return RedirectToAction("List_of_Application", "Home");
             }
-            {
-                db1.Close(); // ✅ Ensure DB2 connection is closed
-            }
-
             return View(theaterList);
         }
+
 
         public ActionResult ActionRequests()
         {
@@ -116,15 +87,12 @@ namespace Amc_theater.Controllers
 
             try
             {
-                db1.Open(); // ✅ Open DB2 connection
-
                 var query = from tr in db.TRN_REGISTRATION
                             where tr.TActive == 1
                             select new
                             {
                                 tr.TId,
                                 tr.ApplId,
-                                //tr.RegId,
                                 tr.TName,
                                 tr.TCity,
                                 tr.TAddress,
@@ -134,14 +102,7 @@ namespace Amc_theater.Controllers
                                 tr.TStatus,
                                 tr.RejectReason,
                                 tr.UpdateDate,
-                                tr.TCommencementDate,
-
-                                //TheaterScreenCount = (from s in db1.NO_OF_SCREENS
-                                //                      where s.ApplId == tr.ApplId && s.ScreenType == "Theater"
-                                //                      select s.ScreenId).Count(),
-                                //VideoTheaterScreenCount = (from s in db1.NO_OF_SCREENS
-                                //                           where s.ApplId == tr.ApplId && s.ScreenType == "Video"
-                                //                           select s.ScreenId).Count(),
+                                tr.TCommencementDate
                             };
 
                 var result = query.ToList();
@@ -150,7 +111,6 @@ namespace Amc_theater.Controllers
                 {
                     T_ID = tr.TId,
                     ApplId = tr.ApplId,
-                    //REG_ID = tr.RegId,
                     T_NAME = tr.TName,
                     T_CITY = tr.TCity,
                     T_ADDRESS = tr.TAddress,
@@ -160,23 +120,18 @@ namespace Amc_theater.Controllers
                     T_STATUS = tr.TStatus,
                     REJECT_REASON = tr.RejectReason,
                     T_COMMENCEMENT_DATE = tr.TCommencementDate ?? DateTime.MinValue,
-                    UPDATE_DATE = tr.UpdateDate ?? DateTime.MinValue,
-                    //SCREEN_COUNT = tr.TheaterScreenCount + tr.VideoTheaterScreenCount,
-                    //THEATER_SCREEN_COUNT = tr.TheaterScreenCount,
-                    //VIDEO_THEATER_SCREEN_COUNT = tr.VideoTheaterScreenCount
+                    UPDATE_DATE = tr.UpdateDate ?? DateTime.MinValue
                 }).ToList();
             }
             catch (Exception ex)
             {
                 ViewBag.Error = "Error: " + ex.Message; // ✅ Capture DB2 errors
             }
-            finally
-            {
-                db1.Close(); // ✅ Ensure DB2 connection is closed
-            }
 
             return View(theaterList);
         }
+
+
 
         public ActionResult Theater_Tax()
         {

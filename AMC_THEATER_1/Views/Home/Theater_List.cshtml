@@ -263,7 +263,7 @@
                                     <td>@(@theater.THEATER_SCREEN_COUNT + @theater.VIDEO_THEATER_SCREEN_COUNT)</td>
                                     <td style="white-space: nowrap;">@theater.T_COMMENCEMENT_DATE</td>
                                     <td style="white-space: nowrap;">
-                                        @(theater.T_STATUS == "Pending" ? "-" : theater.UPDATE_DATE)
+                                        @(theater.T_STATUS == "Pending" ? "-" : theater.UPDATE_DATE?.ToString("dd/MM/yyyy"))
                                     </td>
                                     <td class="sticky-column-right">
                                         <a href="@Url.Action("Registration", "TRN_REGISTRATION", new { id = theater.T_ID, mode="view"})"
