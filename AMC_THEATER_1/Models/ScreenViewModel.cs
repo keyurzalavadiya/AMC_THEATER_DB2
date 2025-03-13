@@ -20,13 +20,13 @@ namespace AMC_THEATER_1.Models
         public int ScreenNo { get; set; }
 
         // ✅ Foreign Key - Ensure correct mapping
-        [Required]
-        [Column("APPL_ID")] // 🔄 Ensure case-sensitive match with DB2
-        public int ApplId { get; set; } // ✅ Foreign Key from TRN_REGISTRATION
+        [Column("APPL_ID")]
+        public int ApplId { get; set; }
 
-        //// ✅ Foreign Key Navigation Property
-        //[ForeignKey("APPL_ID")] // 🔄 Correct reference (should match property name, not column name)
-        //public virtual TheaterViewModel Theater { get; set; }
+
+        // ✅ Foreign Key Navigation Property
+        [ForeignKey("APPL_ID")] // 🔄 Correct reference (should match property name, not column name)
+        public virtual TheaterViewModel Theater { get; set; }
 
         // ✅ Other columns
         [Column("AUDIENCE_CAPACITY")]

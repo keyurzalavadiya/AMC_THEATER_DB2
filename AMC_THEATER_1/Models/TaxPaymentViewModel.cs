@@ -10,10 +10,9 @@ namespace AMC_THEATER_1.Models
     public class TaxPaymentViewModel
     {
 
-        [Required]
-        [Column("APPL_ID")] // ✅ Keep only column mapping
-
+        [Column("APPL_ID")]
         public int ApplId { get; set; }
+
         public string TheaterName { get; set; }
 
         [Required]

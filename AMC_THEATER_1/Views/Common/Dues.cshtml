@@ -41,30 +41,26 @@
 
                     </tr>
                 </thead>
-                <tbody>
+                <tbody>sdvgergefgedrbg
                     @if (Model != null && Model.Any())
                     {
-                        foreach (var theater in Model)
+                        foreach (var theater in Model) // ✅ No need to filter in View anymore
                         {
-                            <tr id="theater-@theater.T_ID">
-                                <td>@theater.T_ID</td>
+                            <tr id="theater-@theater.ApplId">
+                                <td>@theater.ApplId</td>
                                 <td>@theater.T_NAME</td>
                                 <td>@theater.T_CITY</td>
                                 <td>@theater.T_WARD</td>
                                 <td>@theater.T_ZONE</td>
                                 <td>@theater.T_ADDRESS</td>
                                 <td>@theater.T_TENAMENT_NO</td>
-                                <td class="@(theater.PAYMENT_STATUS == "Not Paid" ? "text-danger fw-bold" : "text-success fw-bold")">
-                                    @if (theater.PAYMENT_STATUS == "Not Paid")
-                                    {
-                                        @theater.PAYMENT_STATUS
-                                    }
-                                </td>
-
-                                <td>@theater.SINCE_MONTH</td> <!-- New Data Column -->
+                                <td class="text-success fw-bold">Paid</td>
+                                <td>@theater.SINCE_MONTH</td>
                                 <td>
-                                    <a href="@Url.Action("Theater_Tax", "Home")" class="btn btn-primary btn-sm">Make Payment</a>
-
+                                    <a href="@Url.Action("Receipt", "Home", new { theaterId = theater.ApplId })"
+                                       class="btn btn-secondary btn-sm" data-bs-toggle="tooltip" title="View Receipt">
+                                        <i class="bi bi-receipt"></i> Receipt
+                                    </a>
                                 </td>
                             </tr>
                         }
@@ -72,9 +68,10 @@
                     else
                     {
                         <tr>
-                            <td colspan="10" class="text-center">No theater data available.</td>
+                            <td colspan="10" class="text-center text-danger fw-bold">No UnPaid Theaters Found</td>
                         </tr>
                     }
+
                 </tbody>
             </table>
         </div>

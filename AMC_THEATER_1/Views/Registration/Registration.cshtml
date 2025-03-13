@@ -209,8 +209,16 @@
                 <div id="OFFLINE_TAX_PAYMENT" class="ms-4" style="display: none;">
                     <div class="row align-items-end">
                         <div class="col-md-4">
-                            <label for="offlineTaxPaidMonth" class="form-label fw-bold ms-3">Latest Month</label>
-                            <input type="month" id="offlineTaxPaidMonth" name="OfflineTaxPaidMonth" class="form-control ms-3">
+                            <label for="OfflineTaxPaidMonth" class="form-label fw-bold ms-3">Latest Month</label>
+                            <select id="OfflineTaxPaidMonth" name="OfflineTaxPaidMonth" class="form-control ms-3">
+                                <option value="">-- Select Month --</option>
+                                @for (int i = 1; i <= 12; i++)
+                                {
+                                    string monthName = new DateTime(2024, i, 1).ToString("MMMM"); // Get full month name
+                                    string selected = (ViewBag.OfflineTaxPaidMonth == i) ? "selected" : ""; // Select if matches DB value
+                                    <option value="@i" @selected>@monthName</option>
+                                }
+                            </select>
                         </div>
 
                         <div class="col-md-4">
