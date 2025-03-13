@@ -146,6 +146,7 @@
     <Compile Include="Models\ReceiptFilterViewModel.cs" />
     <Compile Include="Models\ReceiptViewModel.cs" />
     <Compile Include="Models\ScreenViewModel.cs" />
+    <Compile Include="Models\SearchViewModel.cs" />
     <Compile Include="Models\TaxPaymentViewModel.cs" />
     <Compile Include="Models\TheaterDueViewModel.cs" />
     <Compile Include="Models\TheaterViewModel.cs" />
