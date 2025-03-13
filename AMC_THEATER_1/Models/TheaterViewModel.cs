@@ -6,17 +6,14 @@ using System.Linq;
 
 namespace AMC_THEATER_1.Models
 {
-    [Table("TRN_REGISTRATION", Schema = "AMCTHEATER")] // ✅ Ensuring correct DB2 schema mapping
+    [Table("TRN_REGISTRATION", Schema = "AMCTHEATER")]
     public class TheaterViewModel
     {
-        // ===== PRIMARY KEY =====
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-
         [Column("\"APPL_ID\"")]
-        public int ApplId { get; set; }  // ✅ Primary Key (Matches DB Column)
+        public int ApplId { get; set; }
 
-        // ===== COLUMNS FROM DATABASE =====
         [Column("T_ID")]
         public string T_ID { get; set; }
 
@@ -35,10 +32,10 @@ namespace AMC_THEATER_1.Models
         [Column("T_ZONE")]
         public string T_ZONE { get; set; }
 
-        [Column("T_STATUS")] // 🔄 Fixed column name
+        [Column("T_STATUS")]
         public string T_STATUS { get; set; }
 
-        [Column("REJECT_REASON")] // 🔄 Fixed column name
+        [Column("REJECT_REASON")]
         public string REJECT_REASON { get; set; }
 
         [Column("T_OWNER_NAME")]
@@ -50,28 +47,25 @@ namespace AMC_THEATER_1.Models
         [Column("T_OWNER_EMAIL")]
         public string T_OWNER_EMAIL { get; set; }
 
-        //[Column("REG_ID")]
-        //public string REG_ID { get; set; }
-
         [Column("T_COMMENCEMENT_DATE")]
-        public DateTime? T_COMMENCEMENT_DATE { get; set; } // 🔄 Made Nullable (DB2 allows NULL)
+        public DateTime? T_COMMENCEMENT_DATE { get; set; }
 
         [Column("T_ADDRESS")]
         public string T_ADDRESS { get; set; }
 
         [Column("UPDATE_DATE")]
-        public DateTime? UPDATE_DATE { get; set; } // 🔄 Made Nullable (DB2 allows NULL)
+        public DateTime? UPDATE_DATE { get; set; }
 
-        // ===== FOREIGN KEYS =====
+        // Lists of related data
         public List<MST_TT_TYPE> ScreenTypes { get; set; }
         public List<ScreenViewModel> Screens { get; set; }
 
-        // ===== NOT MAPPED (Calculated Fields, Display-Only Fields) =====
+        // Additional properties
         [NotMapped]
-        public string PAYMENT_STATUS { get; set; } // ✅ Not in DB, calculated for UI
+        public string PAYMENT_STATUS { get; set; }
 
         [NotMapped]
-        public string SINCE_MONTH { get; set; } // ✅ Not in DB, calculated for UI
+        public string SINCE_MONTH { get; set; }
 
         [NotMapped]
         public string Display_T_ID => T_STATUS?.Equals("Approved", StringComparison.OrdinalIgnoreCase) == true
@@ -79,16 +73,29 @@ namespace AMC_THEATER_1.Models
                                         : "NOT GENERATED";
 
         [NotMapped]
-        public int SCREEN_COUNT { get; set; } // ✅ Count from `NO_OF_SCREENS`
+        public int SCREEN_COUNT { get; set; }
 
         [NotMapped]
-        public int THEATER_SCREEN_COUNT { get; set; } // ✅ Separate count for Theater Screens
+        public int THEATER_SCREEN_COUNT { get; set; }
 
         [NotMapped]
-        public int VIDEO_THEATER_SCREEN_COUNT { get; set; } // ✅ Separate count for Video Theater Screens
+        public int VIDEO_THEATER_SCREEN_COUNT { get; set; }
 
         [NotMapped]
-        public bool IsEditMode { get; set; } // ✅ Used for UI Edit Mode
+        public bool IsEditMode { get; set; }
+
+        // ✅ Receipt fields (no need for ReceiptFilterViewModel anymore)
+        [NotMapped]
+        public string RCPT_NO { get; set; } = "N/A";
+
+        [NotMapped]
+        public DateTime? RCPT_GEN_DATE { get; set; } = DateTime.Now;
+
+        [NotMapped]
+        public string PAY_MODE { get; set; } = "Cash";
+
+        [NotMapped]
+        public string STATUS { get; set; } = "Paid";
 
         // ===== METHODS =====
         public string GetScreenType()
@@ -97,3 +104,7 @@ namespace AMC_THEATER_1.Models
         }
     }
 }
+
+
+
+                    

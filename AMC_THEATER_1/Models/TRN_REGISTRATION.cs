@@ -16,11 +16,12 @@ namespace AMC_THEATER_1.Models
         [Column("T_ID")]
         public string TId { get; set; }  // Unique Identifier (Not Primary Key)
 
-        [Required]
+
+
         [Column("T_STATUS")]
         public string TStatus { get; set; }
 
-        [Required]
+ 
         [Column("T_ACTIVE")]
         public short? TActive { get; set; } // SMALLINT
 

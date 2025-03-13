@@ -35,7 +35,7 @@
             <div class="me-5">
                 <div class="me-5">
                     <!-- Filter Form -->
-                    <form id="filterForm" class="p-3 border border-dark bg-light" method="get" action="@Url.Action("AllReceipt", "Home")">
+                    <form id="filterForm" class="p-3 border border-dark bg-light" method="get" action="@Url.Action("AllReceipt", "Common")">
                         <div class="row g-3">
                             <!-- Theater ID -->
                             <div class="col-md-3">
@@ -98,12 +98,12 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @if (Model != null && Model.Any())
+                            @if (Model != null && Model.Any(t => t.PAYMENT_STATUS == "Paid"))
                             {
                                 foreach (var theater in Model)
                                 {
-                                    <tr id="theater-@theater.T_ID">
-                                        <td>@theater.T_ID</td>
+                                    <tr id="theater-@theater.ApplId">
+                                        <td>@theater.ApplId</td>
                                         <td>@theater.T_NAME</td>
                                         <td>@theater.T_CITY</td>
                                         <td>@theater.T_WARD</td>
@@ -117,7 +117,7 @@
                                         <td>
                                             @if (theater.PAYMENT_STATUS == "Paid")
                                             {
-                                                <a href="@Url.Action("Receipt", "Home", new { theaterId = theater.T_ID })"
+                                                <a href="@Url.Action("Receipt", "Home", new { theaterId = theater.ApplId })"
                                                    class="btn btn-secondary btn-sm" data-bs-toggle="tooltip" title="View Receipt">
                                                     <i class="bi bi-receipt"></i> Receipt
                                                 </a>
@@ -127,6 +127,7 @@
                                                 <span class="text-muted">N/A</span>
                                             }
                                         </td>
+
                                     </tr>
                                 }
                             }

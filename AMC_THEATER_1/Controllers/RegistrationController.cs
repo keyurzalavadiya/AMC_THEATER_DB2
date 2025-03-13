@@ -19,7 +19,7 @@ namespace AMC_THEATER_1.Controllers
         private readonly ApplicationDbContext db = new ApplicationDbContext();
         private readonly string db2ConnectionString = "Database=prddb1;uid=prdinst1;pwd=prdinst1;Server=123.63.211.14:50000;";
         private readonly DB2Connection db2Connection = new DB2Connection("Database=prddb1;uid=prdinst1;pwd=prdinst1;Server=123.63.211.14:50000;");
-       
+
         public ActionResult Edit(int id, string mode = "edit")
         {
             try
@@ -28,6 +28,7 @@ namespace AMC_THEATER_1.Controllers
                               .Where(r => r.ApplId == id) // Ensure correct filtering
                               .Include(r => r.NO_OF_SCREENS)
                               .Include(r => r.TRN_THEATRE_DOCS)
+
                               .FirstOrDefault();
 
                 if (model == null)
@@ -35,6 +36,10 @@ namespace AMC_THEATER_1.Controllers
                     TempData["ErrorMessage"] = "No record found!";
                     return RedirectToAction("List_of_Application", "Home");
                 }
+                // ✅ Extract month & year safely from nullable DateTime
+                ViewBag.OfflineTaxPaidMonth = model.OfflineTaxPaidMonth?.Month; // Get only month (1-12)
+                ViewBag.OfflineTaxPaidYear = model.OfflineTaxPaidYear?.Year;   // Get only year
+
 
                 // ✅ Ensure lists are initialized
                 model.NO_OF_SCREENS = model.NO_OF_SCREENS ?? new List<NO_OF_SCREENS>();
@@ -151,11 +156,19 @@ namespace AMC_THEATER_1.Controllers
                                 model.OfflineTaxPaidYear = new DateTime(year, 1, 1);
                                 Debug.WriteLine($"Parsed OfflineTaxPaidYear: {model.OfflineTaxPaidYear}");
                             }
+                            // ✅ Handling OfflineTaxPaidMonth
+                            if (!string.IsNullOrEmpty(Request.Form["OfflineTaxPaidMonth"]) && int.TryParse(Request.Form["OfflineTaxPaidMonth"], out int month) && month >= 1 && month <= 12)
+                            {
+                                model.OfflineTaxPaidMonth = new DateTime(model.OfflineTaxPaidYear?.Year ?? DateTime.Now.Year, month, 1); // Store as DateTime
+                                Debug.WriteLine($"Parsed OfflineTaxPaidMonth: {model.OfflineTaxPaidMonth}");
+                            }
+                            //model.TActive = 1; // Ensure column name matches DB2 schema
+                            //model.TStatus = "Pending";
+                      
 
-                            model.TActive = 1; // Ensure column name matches DB2 schema
-                            model.TStatus = "Pending";
                             db.TRN_REGISTRATION.Add(model);
                             db.SaveChanges();
+                            db.Database.ExecuteSqlCommand("CALL AMCTHEATER.ADD_THEATER(@p0)", model.ApplId);
                         }
                         else // Update existing record
                         {
