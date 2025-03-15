@@ -20,8 +20,7 @@ namespace Amc_theater.Controllers
 {
     public class HomeController : Controller
     {
-        readonly ApplicationDbContext db = new ApplicationDbContext(); // Ass
-        DB2Connection db1 = new DB2Connection("Database=prddb1;uid=prdinst1;pwd=prdinst1;Server=123.63.211.14:50000;");
+        readonly ApplicationDbContext db = new ApplicationDbContext(); 
         public ActionResult List_of_Application()
         {
             ViewBag.CurrentAction = "List of Application"; // ✅ Important for UI
