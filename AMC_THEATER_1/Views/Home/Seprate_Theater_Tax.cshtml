@@ -100,7 +100,7 @@
                             <div class="row g-3 align-items-center">
                                 <div class="col-md-4">
                                     <label for="Theater_Id" class="form-label fw-bold">Theater Id</label>
-                                    <input type="text" id="Theater_Id" name="owner_name" class="form-control w-100" value="@Model.TheaterId" readonly required>
+                                    <input type="text" id="Theater_Id" name="owner_name" class="form-control w-100" value="@Model.ApplId" readonly required>
                                 </div>
                                 <div class="col-md-4">
                                     <label for="Theater_Name" class="form-label fw-bold">Theater Name</label>
@@ -124,7 +124,7 @@
                                 </div>
                                 <div class="row mt-5">
                                     <form action="@Url.Action("ProcessTaxPaymentSeprate", "Home")" method="post" enctype="multipart/form-data">
-                                        <input type="hidden" name="TheaterId" value="@Model.TheaterId">
+                                        <input type="hidden" name="TheaterId" value="@Model.ApplId">
 
                                         <div class="row align-items-end">
                                             <div class="col-md-4">

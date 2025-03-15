@@ -148,13 +148,15 @@
                                     <td class="text-center">@theater.THEATER_SCREEN_COUNT</td>
                                     <td class="text-center">@theater.VIDEO_THEATER_SCREEN_COUNT</td>
                                     <td class="text-center">@(@theater.THEATER_SCREEN_COUNT + @theater.VIDEO_THEATER_SCREEN_COUNT)</td>
-                                    <td style="white-space: nowrap;">@theater.T_COMMENCEMENT_DATE</td>
+                                    <td style="white-space: nowrap;">
+                                        @(theater.T_COMMENCEMENT_DATE.HasValue? theater.T_COMMENCEMENT_DATE.Value.ToString("dd/MMM/yyyy"): "")
+                                    </td>
                                     <td class="@(theater.T_STATUS == "Approved" ? "text-success" : (theater.T_STATUS == "Rejected" ? "text-danger" : "text-warning"))">
                                         @(theater.T_STATUS == "Approved" ? "Approved" : theater.T_STATUS == "Rejected" ? "Rejected" : "Pending")
                                     </td>
                                     <td>@(theater.T_STATUS == "Rejected" ? theater.REJECT_REASON : "-")</td>
                                     <td style="white-space: nowrap;">
-                                        @(theater.T_STATUS == "Pending" ? "-" : theater.UPDATE_DATE?.ToString("dd/MM/yyyy"))
+                                        @(theater.T_STATUS == "Pending" ? "-" : theater.UPDATE_DATE?.ToString("dd/MMM/yyyy"))
                                     </td>
                                     <td class="sticky-column-right">
                                         @if (isActionRequests)

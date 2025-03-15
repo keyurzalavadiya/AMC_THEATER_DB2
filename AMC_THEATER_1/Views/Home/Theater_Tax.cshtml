@@ -59,15 +59,18 @@
                     <form action="@Url.Action("Theater_Tax", "Home")" method="post">
                         <div class="mb-4 ms-5">
                             <div class="d-flex align-items-center justify-content-between">
-                                <div class="d-flex mt-4 align-items-center">
-                                    <input type="text" id="theater_id" name="theater_id"
-                                           class="form-control me-2 w-100 text-center"
-                                           placeholder="Enter Theater ID"
-                                           value="@Request.Form["theater_id"]" required> <!-- ✅ Retains input value -->
+                                <div class="mb-3 mt-3">
+                                    <label for="theater_id" class="fw-bold">Theater Id</label>
+                                    <div class="input-group" style="max-width: 250px;">
+                                        <input type="text" id="theater_id" name="theater_id"
+                                               class="form-control text-center"
+                                               placeholder="Enter Theater ID"
+                                               value="@Request.Form["theater_id"]" required>
 
-                                    <button type="submit" class="btn btn-secondary">
-                                        <i class="fas fa-search"></i>
-                                    </button>
+                                        <button type="submit" class="btn btn-secondary">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="text-end">
                                     <a href="@Url.Action("SearchID", "Home")" id="forgotIdLink" class="btn pe-3 ps-3 mt-3 w-2me-5 btn-secondary">Search ID</a>
@@ -75,10 +78,6 @@
                             </div>
                         </div>
                     </form>
-
-
-
-
 
                     <div class="mb-4">
                         <h4 class="fw-bold text-center bg-light mt-3 p-3">Basic Information</h4>
@@ -240,15 +239,7 @@
                             <div class="col-12 text-center">
                                 <button type="submit" class="btn btn-success m-3 w-25">Submit Payment</button>
                             </div>
-
-
-
-
-
-
-
                         </div>
-
                     }
                     </form>
                 </div>

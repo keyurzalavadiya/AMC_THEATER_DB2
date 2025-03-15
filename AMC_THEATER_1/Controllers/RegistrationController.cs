@@ -10,22 +10,21 @@ using System.Data.Entity.Validation;
 using System.Data.Entity.Infrastructure;
 using System.Diagnostics;
 using System.Data;
-using System.IO; // ✅ Import DB2 namespace
+using System.IO; 
 
 namespace AMC_THEATER_1.Controllers
 {
     public class RegistrationController : Controller
     {
         private readonly ApplicationDbContext db = new ApplicationDbContext();
-        private readonly string db2ConnectionString = "Database=prddb1;uid=prdinst1;pwd=prdinst1;Server=123.63.211.14:50000;";
-        private readonly DB2Connection db2Connection = new DB2Connection("Database=prddb1;uid=prdinst1;pwd=prdinst1;Server=123.63.211.14:50000;");
+        
 
         public ActionResult Edit(int id, string mode = "edit")
         {
             try
             {
                 var model = db.TRN_REGISTRATION
-                              .Where(r => r.ApplId == id) // Ensure correct filtering
+                              .Where(r => r.ApplId == id) 
                               .Include(r => r.NO_OF_SCREENS)
                               .Include(r => r.TRN_THEATRE_DOCS)
 
@@ -90,9 +89,6 @@ namespace AMC_THEATER_1.Controllers
         }
 
 
-
-
-        // ✅ GET: Registration (Load Registration Form)
         public ActionResult Registration(int? id, bool isViewPage = false, string mode = "create")
         {
             ViewBag.PageTitle = "Theater Registration";
@@ -103,12 +99,7 @@ namespace AMC_THEATER_1.Controllers
 
             if (id.HasValue)
             {
-                using (DB2Connection db2Conn = new DB2Connection(db2ConnectionString))
-                {
-                    try
-                    {
-                        db2Conn.Open(); // ✅ Open DB2 Connection
-
+               
                         var registrationData = db.TRN_REGISTRATION
                             .Include(r => r.NO_OF_SCREENS)
                             .Include(r => r.TRN_THEATRE_DOCS)
@@ -124,30 +115,17 @@ namespace AMC_THEATER_1.Controllers
                         ViewBag.Screens = model.NO_OF_SCREENS?.ToList() ?? new List<NO_OF_SCREENS>();
                         ViewBag.UploadedDocs = model.TRN_THEATRE_DOCS?.ToList() ?? new List<TRN_THEATRE_DOCS>();
                     }
-                    catch (Exception ex)
-                    {
-                        TempData["ErrorMessage"] = "DB2 Connection Error: " + ex.Message;
-                    }
-                    finally
-                    {
-                        db2Conn.Close(); // ✅ Ensure DB2 connection is closed
-                    }
-                }
-            }
-
+            
             return View(model);
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Registration(TRN_REGISTRATION model, HttpPostedFileBase[] documents, string actionType, string rejectReason = null)
         {
             using (var transaction = db.Database.BeginTransaction(IsolationLevel.ReadCommitted))
             {
-                try
-                {
-                    using (var db2Connection = new DB2Connection(db2ConnectionString)) // Ensure proper disposal
-                    {
-                        db2Connection.Open();
+               
 
                         if (model.ApplId == 0) // New Registration
                         {
@@ -162,34 +140,19 @@ namespace AMC_THEATER_1.Controllers
                                 model.OfflineTaxPaidMonth = new DateTime(model.OfflineTaxPaidYear?.Year ?? DateTime.Now.Year, month, 1); // Store as DateTime
                                 Debug.WriteLine($"Parsed OfflineTaxPaidMonth: {model.OfflineTaxPaidMonth}");
                             }
-                            //model.TActive = 1; // Ensure column name matches DB2 schema
-                            //model.TStatus = "Pending";
-                      
+                           
 
                             db.TRN_REGISTRATION.Add(model);
                             db.SaveChanges();
                             db.Database.ExecuteSqlCommand("CALL AMCTHEATER.ADD_THEATER(@p0)", model.ApplId);
                         }
-                        else // Update existing record
+                        else 
                         {
-                            // ✅ Use the UpdateTheaterStatus method to handle status updates
                          
                             var existingEntity = db.TRN_REGISTRATION.Find(model.ApplId);
                             UpdateTheaterStatus(existingEntity, actionType, rejectReason);
-                            //if (existingEntity == null)
-                            //{
-                            //    TempData["ErrorMessage"] = "No record found for the provided ID.";
-                            //    return View(model);
-                            //}
+                         
 
-                           
-
-                            //// ✅ Update entity values
-                            //db.Entry(existingEntity).CurrentValues.SetValues(model);
-                            //db.Entry(existingEntity).State = EntityState.Modified;
-                            //db.SaveChanges();
-
-                            // 🧹 Clear existing child records before adding new ones
                             db.NO_OF_SCREENS.RemoveRange(db.NO_OF_SCREENS.Where(d => d.ApplId == model.ApplId));
                             db.SaveChanges(); // Ensure previous deletion is committed
 
@@ -209,18 +172,13 @@ namespace AMC_THEATER_1.Controllers
                         db.SaveChanges(); // Final save
 
                         transaction.Commit();
-                        return RedirectToAction("List_of_Application", "Common");
+                        return RedirectToAction("List_of_Application", "Home");
                     }
                 }
-                catch (DbUpdateException ex)
-                {
-                    transaction.Rollback();
-                    Debug.WriteLine($"DB2 Error: {ex.ToString()}"); // Capture full stack trace
-                    TempData["ErrorMessage"] = "Database update error. Please contact support.";
-                    return View(model);
-                }
-            }
-        }
+             
+                  
+            
+        
 
         private void HandleDocuments(int applId, HttpPostedFileBase[] documents)
         {
@@ -298,34 +256,6 @@ namespace AMC_THEATER_1.Controllers
         }
 
 
-        private void HandleScreens(int applId, string[] seatCapacity = null, string[] screenType = null)
-        {
-            var existingScreens = db.NO_OF_SCREENS.Where(s => s.ApplId == applId).ToList();
-
-            if (existingScreens.Any())
-            {
-                db.NO_OF_SCREENS.RemoveRange(existingScreens);
-                db.SaveChanges();
-            }
-
-            if (seatCapacity != null && screenType != null && seatCapacity.Length == screenType.Length)
-            {
-                for (int i = 0; i < seatCapacity.Length; i++)
-                {
-                    if (!string.IsNullOrEmpty(seatCapacity[i]) && !string.IsNullOrEmpty(screenType[i]))
-                    {
-                        db.NO_OF_SCREENS.Add(new NO_OF_SCREENS
-                        {
-                            ApplId = applId,
-                            AudienceCapacity = int.Parse(seatCapacity[i]),
-                            ScreenType = screenType[i]
-                        });
-                    }
-                }
-            }
-
-            db.SaveChanges();
-        }
 
         private void UpdateTheaterStatus(TRN_REGISTRATION existingRegistration, string actionType, string rejectReason)
         {
@@ -373,7 +303,6 @@ namespace AMC_THEATER_1.Controllers
             {
                 System.Diagnostics.Debug.WriteLine($"⚠️ Concurrency issue detected for APPLICATION_ID: {existingRegistration.ApplId}. Retrying update...");
 
-                // ✅ Reload entity and retry
                 db.Entry(dbEntity).Reload();
                 db.SaveChanges();
             }
@@ -410,10 +339,6 @@ namespace AMC_THEATER_1.Controllers
             return fileName;
         }
 
-
-
-
-        // ✅ Fetch Active Documents
         private List<MST_DOCS> GetActiveDocuments()
         {
             return db.MST_DOCS
@@ -435,9 +360,5 @@ namespace AMC_THEATER_1.Controllers
                 })
                 .ToList();
         }
-
-
-      
-        
     }
 }

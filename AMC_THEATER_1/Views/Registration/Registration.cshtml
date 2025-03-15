@@ -180,7 +180,7 @@
                             new SelectListItem { Text = "Self", Value = "Self" },
                             new SelectListItem { Text = "Tenant", Value = "Tenant" }
                         },
-                        new { @class = "form-control" })
+                        new { @class = "form-control readonly-field" })
                     </div>
                 </div>
 
@@ -193,13 +193,13 @@
 
                         <div class="form-check d-inline-block me-3">
                             @Html.RadioButton("TTaxPayingOffline", "1", Model?.TTaxPayingOffline == 1,
-                                new { @class = "form-check-input", id = "yes", required = "required" })
+                                new { @class = "form-check-input readonly-field", id = "yes", required = "required" })
                             <label for="yes" class="form-check-label">Yes</label>
                         </div>
 
                         <div class="form-check d-inline-block">
                             @Html.RadioButton("TTaxPayingOffline", "0", Model?.TTaxPayingOffline == 0,
-                                new { @class = "form-check-input", id = "no", required = "required" })
+                                new { @class = "form-check-input readonly-field", id = "no", required = "required" })
                             <label for="no" class="form-check-label">No</label>
                         </div>
                     </div>
@@ -210,7 +210,7 @@
                     <div class="row align-items-end">
                         <div class="col-md-4">
                             <label for="OfflineTaxPaidMonth" class="form-label fw-bold ms-3">Latest Month</label>
-                            <select id="OfflineTaxPaidMonth" name="OfflineTaxPaidMonth" class="form-control ms-3">
+                            <select id="OfflineTaxPaidMonth" name="OfflineTaxPaidMonth" class="form-control ms-3 readonly-field">
                                 <option value="">-- Select Month --</option>
                                 @for (int i = 1; i <= 12; i++)
                                 {
@@ -222,16 +222,16 @@
                         </div>
 
                         <div class="col-md-4">
-                            <label for="OfflineTaxPaidYear" class="form-label fw-bold ms-2">Offline Tax Due Year <span class="text-danger">*</span></label>
+                            <label for="OfflineTaxPaidYear" class="form-label fw-bold ms-2 ">Offline Tax Due Year <span class="text-danger">*</span></label>
                             @Html.DropDownList("OfflineTaxPaidYear", Enumerable.Range(DateTime.Now.Year - 50, 51)
                                 .Select(y => new SelectListItem { Text = y.ToString(), Value = y.ToString() }),
                                 "-- Select Year --",
-                                new { @class = "form-control ms-2" })
+                                new { @class = "form-control ms-2 readonly-field" })
                         </div>
 
                         <div class="col-md-4">
                             <label for="offlineTaxPayment" class="form-label fw-bold ms-2">Amount (Rs.)</label>
-                            @Html.TextBox("OfflineTaxPayment", Model?.OfflineTaxPayment, new { @class = "form-control ms-1", placeholder = "Offline Tax Payment" })
+                            @Html.TextBox("OfflineTaxPayment", Model?.OfflineTaxPayment, new { @class = "form-control ms-1 readonly-field", placeholder = "Offline Tax Payment" })
                         </div>
                     </div>
                 </div>
@@ -258,7 +258,7 @@
                                 <tr>
                                     <td>
                                         <input type="hidden" name="NO_OF_SCREENS[@screenNo].ApplId" value="@screenList[screenNo].ApplId">
-                                        <input type="text" name="NO_OF_SCREENS[@screenNo].ScreenNo" class="form-control ms-4"
+                                        <input type="text" name="NO_OF_SCREENS[@screenNo].ScreenNo" class="form-control ms-4 readonly-field"
                                                value="@screenList[screenNo].ScreenNo">
                                     </td>
 
@@ -406,8 +406,16 @@
 
                         <button type="button" class="btn btn-warning" onclick="location.href='@Url.Action("List_of_Application", "Home")'">Cancel</button>
                     }
-                    else if (ViewBag.Mode == "view")
+                    else if (ViewBag.Mode == "view" )
                     {
+                        ViewBag.ShowBasicNavbar = false;
+                        ViewBag.ShowNavbar = true;
+                        ViewBag.ShowSideBar = false;
+                        ViewBag.ShowSideBar1 = true;
+                        ViewBag.Login = false;
+                        ViewBag.ShowHomeIcon = true;
+                        ViewBag.Module = true;
+                        ViewBag.IsViewPAge = true;
 
                         <button type="button" class="btn btn-secondary" onclick="window.history.back()">Back</button>
                     }
@@ -455,13 +463,7 @@
                             </div>
                         </div>
                     }
-                    else if (ViewBag.Mode == "back" && ViewBag.IsViewPAge == true)
-                    {
-
-                        ViewBag.IsViewPAge = true;
-                        <button type="button" class="btn btn-secondary" onclick="window.history.back()">Back</button>
-                    }
-
+                   
                     <!-- Reject Reason Modal -->
                     <div class="modal fade" id="rejectModal" tabindex="-1" role="dialog" aria-labelledby="rejectModalLabel" aria-hidden="true">
                         <div class="modal-dialog" role="document">
