@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Amc_theater.Controllers;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -96,6 +97,7 @@ namespace AMC_THEATER_1.Models
 
         [NotMapped]
         public string STATUS { get; set; } = "Paid";
+        internal List<DocumentViewModel> Documents { get; set; }
 
         // ===== METHODS =====
         public string GetScreenType()

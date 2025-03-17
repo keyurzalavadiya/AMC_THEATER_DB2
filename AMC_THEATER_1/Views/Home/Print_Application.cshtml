@@ -1,0 +1,208 @@
+﻿@model AMC_THEATER_1.Models.TheaterViewModel
+
+@{
+    ViewBag.Title = "Print_Application";
+}
+
+<h2>Print_Application</h2>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theater Registration Application</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .container {
+            width: 100% !important;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .submit-btn, .print-btn {
+            margin-top: 10px;
+            background-color: #007BFF;
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .table-container {
+            display: flex;
+            justify-content: space-between;
+        }
+
+            .table-container table:first-child {
+                width: 55.8%;
+            }
+
+            .table-container table:last-child {
+                width: 50%;
+            }
+
+        @@media print {
+            body, html {
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                justify-content: left;
+                align-items: center;
+            }
+
+            .container {
+                width: 100% !important;
+                margin: auto;
+                text-align: center;
+                transform: translateY(0%);
+                position: relative;
+                top: 0;
+            }
+
+            .table-container {
+                display: flex;
+                justify-content: space-between;
+                width: 100%;
+            }
+
+                .table-container table {
+                    width: 50%; /* Maintain the same width as on screen */
+                    margin: auto;
+                    border-collapse: collapse;
+                }
+
+            th, td {
+                border: 1px solid black;
+                padding: 10px;
+                text-align: left;
+            }
+
+            .submit-btn, .print-btn {
+                display: none; /* Hide buttons when printing */
+            }
+        }
+    </style>
+
+
+    <script>
+        function printApplication() {
+            window.print();
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>Ahmedabad Municipal Corporation</h2>
+        <h3>Application Form</h3>
+
+        <table>
+            <tr>
+                <th>Application No</th>
+                <td colspan="2"><input type="text" name="application_no"></td>
+                <th>Application Date</th>
+                <td><input type="date" name="application_date" value=" @Model.ApplId"></td>
+            </tr>
+            <tr>
+                <th>Theater Name</th>
+                <td colspan="2"><input type="text" name="theater_name" value="@Model.T_NAME"></td>
+                <th>License Holder’s Name</th>
+                <td><input type="text" name="license_holder"  value="@Model.T_OWNER_NAME"></td>
+            </tr>
+            <tr>
+                <th>Address</th>
+                <td colspan="2"><input type="text" name="address" value="@Model.T_ADDRESS"></td>
+                <th>Representatives’ Name</th>
+                <td><input type="text" name="representative_name" value="@Model.T_OWNER_NAME"></td>
+            </tr>
+            <tr>
+                <th rowspan="2">Contact Details</th>
+                <th>Contact No.</th>
+                <td colspan="3"><input type="text" name="contact_no" value="@Model.T_OWNER_NUMBER"></td>
+            </tr>
+            <tr>
+                <th>Email ID</th>
+                <td colspan="3"><input type="email" name="email" value="@Model.T_OWNER_EMAIL"></td>
+            </tr>
+            <tr>
+                <th>Commencement Date</th>
+                <td colspan="2"><input type="date" name="commencement_date" value="@Model.T_COMMENCEMENT_DATE"></td>
+                <th>License Date</th>
+                <td><input type="date" name="license_date" value="@Model.T_COMMENCEMENT_DATE"></td>
+            </tr>
+            <tr>
+                <th>Zone</th>
+                <td><input type="text" name="zone" value="@Model.T_ZONE"></td>
+                <th>Ward</th>
+                <td colspan="2"><input type="text" name="ward" value="@Model.T_CITY"></td>
+            </tr>
+            <tr>
+                <th>Tenement Nos.</th>
+                <td colspan="2"><input type="text" name="tenement_no" value="@Model.T_TENAMENT_NO"></td>
+                <th>PEC/PRC No.</th>
+                <td><input type="text" name="pec_prc_no" value="@Model.T_CITY"></td>
+            </tr>
+        </table>
+
+        <div class="table-container">
+            <table>
+                <tr>
+                    <th>Screen No.</th>
+                    <th>Type</th>
+                    <th>Seat Capacity</th>
+                </tr>
+                @*<tr>
+                <td><input type="text" name="screen_no"></td>
+                <td><input type="text" name="type"></td>
+                <td><input type="number" name="seat_capacity"></td>
+            </tr>*@
+                @*<tr>
+                <td><input type="text" name="screen_no"></td>
+                <td><input type="text" name="type"></td>
+                <td><input type="number" name="seat_capacity"></td>
+            </tr>*@
+                @foreach (var screen in Model.Screens)
+                {
+                    <tr>
+                        <td>@screen.ScreenNo</td>
+                        <td>@screen.ScreenType</td>
+                        <td>@screen.AudienceCapacity</td>
+                    </tr>
+                }
+            </table>
+            @if (ViewBag.UploadedDocs != null && ViewBag.UploadedDocs.Count > 0)
+            {
+
+        <table>
+            <tr>
+                <th>Uploaded Documents</th>
+            </tr>
+            <tr>
+                <td><input type="file" name="documents"></td>
+            </tr>
+            <tr>
+                <td><input type="file" name="documents"></td>
+            </tr>
+        </table>
+            }
+        </div>
+
+        <button class="submit-btn">Submit</button>
+        <button class="print-btn" onclick="printApplication()">Print</button>
+    </div>
+</body>
+</html>
