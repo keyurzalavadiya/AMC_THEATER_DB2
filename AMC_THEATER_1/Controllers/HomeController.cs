@@ -20,7 +20,60 @@ namespace Amc_theater.Controllers
 {
     public class HomeController : Controller
     {
-        readonly ApplicationDbContext db = new ApplicationDbContext(); 
+        readonly ApplicationDbContext db = new ApplicationDbContext();
+
+        public ActionResult Print_Application(int? id, string mode = "print")
+        {
+            if (id == null)
+            {
+                TempData["ErrorMessage"] = "Invalid Application ID!";
+                return RedirectToAction("List_of_Application", "Home");
+            }
+
+            var registration = db.TRN_REGISTRATION.FirstOrDefault(r => r.ApplId == id);
+            if (registration == null)
+            {
+                TempData["ErrorMessage"] = "No record found!";
+                return RedirectToAction("List_of_Application", "Home");
+            }
+
+            // ✅ Map TRN_REGISTRATION to TheaterViewModel
+            var viewModel = new TheaterViewModel
+            {
+                ApplId = registration.ApplId,
+                T_ID = registration.TId,
+                T_NAME = registration.TName,
+                T_CITY = registration.TCity,
+                T_TENAMENT_NO = registration.TTenamentNo,
+                T_WARD = registration.TWard,
+                T_ZONE = registration.TZone,
+                T_OWNER_NAME = registration.ManagerName,
+                //T_OWNER_NUMBER = registration.ManagerContactNo,
+                T_OWNER_EMAIL = registration.TEmail,
+                T_COMMENCEMENT_DATE = registration.TCommencementDate,
+                T_ADDRESS = registration.TAddress,
+                //UPDATE_DATE = registration.UPDATE_DATE,
+
+                // Fetch related data
+                Screens = db.NO_OF_SCREENS
+                            .Where(s => s.ApplId == id)
+                            .Select(s => new ScreenViewModel
+                            {
+                                ScreenNo = s.ScreenNo,
+                                ScreenType = s.ScreenType,
+                                AudienceCapacity = s.AudienceCapacity
+                            })
+                            .ToList(),
+
+                ScreenTypes = db.MST_TT_TYPE.ToList(), // If needed
+                IsEditMode = (mode == "print"),
+            };
+
+            ViewBag.Mode = mode;
+            return View("Print_Application", viewModel);
+        }
+
+
         public ActionResult List_of_Application()
         {
             ViewBag.CurrentAction = "List of Application"; // ✅ Important for UI
@@ -136,73 +189,59 @@ namespace Amc_theater.Controllers
         {
             return View();
         }
-
         [HttpPost]
-        public ActionResult Theater_Tax(int theater_id)
+        public ActionResult Theater_Tax(string theater_id)
         {
-            if (theater_id <= 0)
-            {
-                TempData["Error"] = "Please enter a valid Theater ID.";
-                return RedirectToAction("Index");
-            }
-
+            // ✅ Initialize ViewModel with default values
             var model = new TaxPaymentViewModel
             {
-                ApplId = theater_id,
-                FromMonth = DateTime.Now.ToString("MMMM"), // Default to current month
+                TId = theater_id,
+                FromMonth = DateTime.Now.ToString("MMMM"), // ✅ Default to current month
                 ToMonth = DateTime.Now.Year.ToString() // ✅ Convert int to string
             };
 
-         
-                    {
-                        // ✅ Step 1: Fetch screen prices first and store in memory
-                        var screenPrices = db.MST_TT_TYPE
-                            .AsNoTracking() // Improves performance
-                            .ToDictionary(p => p.ScreenType, p => p.ScreenPrice);
+            // ✅ Step 1: Fetch screen prices first and store in memory
+            var screenPrices = db.MST_TT_TYPE
+                .AsNoTracking() // ✅ Improves performance
+                .ToDictionary(p => p.ScreenType, p => p.ScreenPrice);
 
-                        // ✅ Step 2: Fetch theater details along with associated screens
-                        var theaterDetails = db.TRN_REGISTRATION
-                            .Where(t => t.ApplId == theater_id)
-                            .Select(t => new
-                            {
-                                ApplID = t.ApplId,
-                                TheaterName = t.TName,
-                                MobileNo = t.ManagerContactNo != null ? t.ManagerContactNo.ToString() : string.Empty,
-                                Address = t.TAddress,
-                                Email = t.TEmail,
-                                Screens = db.NO_OF_SCREENS
-                                    .Where(s => s.ApplId == t.ApplId)
-                                    .ToList() // ✅ Move data to memory first
-                            })
-                            .FirstOrDefault();
+            // ✅ Step 2: Fetch only Approved theater details
+            var theater = db.TRN_REGISTRATION
+                .Where(t => t.TId == theater_id && t.TStatus == "Approved") // ✅ Filter for Approved status
+                .FirstOrDefault();
 
-                        if (theaterDetails == null)
-                        {
-                            TempData["Error"] = "Theater ID not found.";
-                            return RedirectToAction("Index");
-                        }
-                        // ✅ Step 3: Map the screens manually after fetching from DB
-                        model.Screens = theaterDetails.Screens
-                            .Select(s => new ScreenViewModel
-                            {
-                                ScreenId = s.ScreenId,
-                                AudienceCapacity = (int)s.AudienceCapacity,
-                                ScreenType = s.ScreenType,
-                                ScreenNo = (int)s.ScreenNo,
-                                ScreenPrice = screenPrices.ContainsKey(s.ScreenType)
-                                              ? Convert.ToInt32(screenPrices[s.ScreenType]) // Ensure conversion
-                                              : 0 // Provide a fallback value
-                            }).ToList();
+            if (theater == null)
+            {
+                TempData["Error"] = "Theater ID not found or not approved.";
+                return RedirectToAction("Index");
+            }
 
-                        model.TheaterName = theaterDetails.TheaterName;
-                        model.MobileNo = theaterDetails.MobileNo;
-                        model.Address = theaterDetails.Address;
-                        model.Email = theaterDetails.Email;
-                    }
+            // ✅ Step 3: Fetch Screens Separately
+            var screens = db.NO_OF_SCREENS
+                .Where(s => s.TId == theater.TId)
+                .ToList(); // ✅ Fetch screens separately
 
-                    return View(model);
-                }
-              
+            // ✅ Step 4: Map data to ViewModel
+            model.Screens = screens.Select(s => new ScreenViewModel
+            {
+                ScreenId = s.ScreenId,
+                AudienceCapacity = (int)s.AudienceCapacity,
+                ScreenType = s.ScreenType,
+                ScreenNo = (int)s.ScreenNo,
+                ScreenPrice = screenPrices.ContainsKey(s.ScreenType)
+                              ? Convert.ToInt32(screenPrices[s.ScreenType])
+                              : 0 // ✅ Fallback value
+            }).ToList();
+
+            model.TheaterName = theater.TName;
+            model.MobileNo = theater.ManagerContactNo != null ? theater.ManagerContactNo.ToString() : string.Empty;
+            model.Address = theater.TAddress;
+            model.Email = theater.TEmail;
+            model.ApplId = theater.ApplId;
+
+            return View(model);
+        }
+
 
         [HttpPost]
         public ActionResult ProcessTaxPayment(TaxPaymentViewModel model, HttpPostedFileBase DocumentPath, FormCollection form)
@@ -252,6 +291,7 @@ namespace Amc_theater.Controllers
                         {
                             var taxPayment = new THEATER_TAX_PAYMENT
                             {
+                                TId = model.TId.ToString(),
                                 ApplId = model.ApplId,
                                 PaymentMonth = currentDate.ToString("MMMM"),
                                 PaymentYear = currentDate.Year,
@@ -269,10 +309,13 @@ namespace Amc_theater.Controllers
                             {
                                 var screenTax = new NO_OF_SCREENS_TAX
                                 {
+                                    TId = model.TId.ToString(),
                                     ApplId = model.ApplId,
+
                                     TaxId = taxPayment.TaxId,
                                     ScreenType = screen.ScreenType ?? "Unknown",
                                     TotalShow = screen.TotalShow,
+                                    AudienceCapacity = screen.AudienceCapacity.HasValue ? (int)screen.AudienceCapacity : 0,
                                     CancelShow = screen.CancelShow,
                                     ActualShow = Math.Max(0, screen.TotalShow - screen.CancelShow),
                                     RatePerScreen = (screen.ScreenType == "Theater") ? 75 : 25,
@@ -485,7 +528,7 @@ namespace Amc_theater.Controllers
                 db.Dispose();
             }
             base.Dispose(disposing);
-        }
+         }
 
         public ActionResult PendingDuesDept()
         {

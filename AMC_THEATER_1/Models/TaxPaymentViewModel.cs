@@ -13,6 +13,9 @@ namespace AMC_THEATER_1.Models
         [Column("APPL_ID")]
         public int ApplId { get; set; }
 
+        [Column("T_ID")]
+        public string TId { get; set; }
+
         public string TheaterName { get; set; }
 
         [Required]

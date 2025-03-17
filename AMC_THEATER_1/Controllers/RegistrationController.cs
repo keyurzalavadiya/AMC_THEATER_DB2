@@ -146,25 +146,34 @@ namespace AMC_THEATER_1.Controllers
                             db.SaveChanges();
                             db.Database.ExecuteSqlCommand("CALL AMCTHEATER.ADD_THEATER(@p0)", model.ApplId);
                         }
-                        else 
+                else
+                {
+                    var existingEntity = db.TRN_REGISTRATION.Find(model.ApplId);
+                    UpdateTheaterStatus(existingEntity, actionType, rejectReason);
+
+                    db.Entry(existingEntity).Reload(); // ✅ Ensure we have the latest TId
+
+                    // ✅ First, delete old NO_OF_SCREENS records
+                    db.NO_OF_SCREENS.RemoveRange(db.NO_OF_SCREENS.Where(d => d.ApplId == model.ApplId));
+                    db.SaveChanges(); // ✅ Ensure deletion is committed
+
+                    // ✅ Then, add new NO_OF_SCREENS records if available
+                    if (model.NO_OF_SCREENS?.Any() == true)
+                    {
+                        foreach (var screen in model.NO_OF_SCREENS)
                         {
-                         
-                            var existingEntity = db.TRN_REGISTRATION.Find(model.ApplId);
-                            UpdateTheaterStatus(existingEntity, actionType, rejectReason);
-                         
-
-                            db.NO_OF_SCREENS.RemoveRange(db.NO_OF_SCREENS.Where(d => d.ApplId == model.ApplId));
-                            db.SaveChanges(); // Ensure previous deletion is committed
-
-                            // 🆕 Add new child records if available
-                            if (model.NO_OF_SCREENS?.Any() == true)
-                            {
-                                db.NO_OF_SCREENS.AddRange(model.NO_OF_SCREENS);
-                            }
+                            screen.TId = existingEntity.TId; // ✅ Assign the correct TId before inserting
+                            screen.ApplId = model.ApplId;
                         }
 
-                        // ✅ Ensure documents are handled **after** ApplId is saved
-                        if (documents != null && documents.Length > 0)
+                        db.NO_OF_SCREENS.AddRange(model.NO_OF_SCREENS);
+                        db.SaveChanges(); // ✅ Save new records
+                    }
+                }
+
+
+                // ✅ Ensure documents are handled **after** ApplId is saved
+                if (documents != null && documents.Length > 0)
                         {
                             HandleDocuments(model.ApplId, documents);
                         }
@@ -172,13 +181,100 @@ namespace AMC_THEATER_1.Controllers
                         db.SaveChanges(); // Final save
 
                         transaction.Commit();
-                        return RedirectToAction("List_of_Application", "Home");
+                        return RedirectToAction("ActionRequests", "Home");
                     }
                 }
-             
-                  
-            
-        
+
+
+        private void UpdateTheaterStatus(TRN_REGISTRATION existingRegistration, string actionType, string rejectReason)
+        {
+            var dbEntity = db.TRN_REGISTRATION.SingleOrDefault(r => r.ApplId == existingRegistration.ApplId);
+
+            if (dbEntity == null)
+            {
+                throw new Exception($"❌ Error: Record with APPLICATION_ID = {existingRegistration.ApplId} not found. It may have been deleted.");
+            }
+
+            db.Entry(dbEntity).Reload(); // ✅ Reload to avoid concurrency issues
+
+            if (actionType == "Edit")
+            {
+                dbEntity.TStatus = "Pending";
+            }
+            else if (actionType == "Approve")
+            {
+                dbEntity.TActive = 1;
+                dbEntity.TStatus = "Approved";
+                dbEntity.RejectReason = null;
+
+                if (string.IsNullOrEmpty(dbEntity.TId))
+                {
+                    dbEntity.TId = GenerateNextTId(); // ✅ Generate new TId if it's NULL
+                }
+
+                Console.WriteLine($"🔥 Generated TId: {dbEntity.TId}"); // ✅ Debugging Output
+
+                dbEntity.UpdateUser = "System";
+                dbEntity.UpdateDate = DateTime.Now;
+
+                db.Entry(dbEntity).State = EntityState.Modified;
+                db.SaveChanges(); // ✅ Save TRN_REGISTRATION changes first
+
+                // ✅ Fetch NO_OF_SCREENS records AFTER saving TId
+                var screenEntities = db.NO_OF_SCREENS.Where(s => s.ApplId == dbEntity.ApplId).ToList();
+
+                if (!screenEntities.Any())
+                {
+                    throw new Exception($"❌ No records found in NO_OF_SCREENS for ApplId: {dbEntity.ApplId}");
+                }
+
+                // ✅ Now update `TId` in `NO_OF_SCREENS`
+                foreach (var screen in screenEntities)
+                {
+                    Console.WriteLine($"Before Update -> ScreenId: {screen.ScreenId}, Old TId: {screen.TId}, New TId: {dbEntity.TId}");
+
+                    screen.TId = dbEntity.TId; // ✅ Assign the correct TId
+                    db.Entry(screen).Property(x => x.TId).IsModified = true; // ✅ Force EF to detect change
+                }
+
+                int affectedRows = db.SaveChanges();
+                Console.WriteLine($"🔥 NO_OF_SCREENS updated rows: {affectedRows}");
+
+                // ✅ If EF6 fails, force the update using SQL
+                if (affectedRows == 0)
+                {
+                    db.Database.ExecuteSqlCommand(
+                        "UPDATE NO_OF_SCREENS SET TId = @p0 WHERE ApplId = @p1",
+                        dbEntity.TId, dbEntity.ApplId
+                    );
+                    Console.WriteLine("🔥 Forced SQL Update on NO_OF_SCREENS");
+                }
+            }
+
+            else if (actionType == "Reject")
+            {
+                dbEntity.TActive = 1;
+                dbEntity.TStatus = "Rejected";
+                dbEntity.RejectReason = rejectReason;
+            }
+
+            dbEntity.UpdateUser = "System";
+            dbEntity.UpdateDate = DateTime.Now;
+
+            db.Entry(dbEntity).State = EntityState.Modified;
+
+            try
+            {
+                db.SaveChanges();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                System.Diagnostics.Debug.WriteLine($"⚠️ Concurrency issue detected for APPLICATION_ID: {existingRegistration.ApplId}. Retrying update...");
+
+                db.Entry(dbEntity).Reload();
+                db.SaveChanges();
+            }
+        }
 
         private void HandleDocuments(int applId, HttpPostedFileBase[] documents)
         {
@@ -255,58 +351,6 @@ namespace AMC_THEATER_1.Controllers
             }
         }
 
-
-
-        private void UpdateTheaterStatus(TRN_REGISTRATION existingRegistration, string actionType, string rejectReason)
-        {
-            var dbEntity = db.TRN_REGISTRATION.SingleOrDefault(r => r.ApplId == existingRegistration.ApplId);
-
-            if (dbEntity == null)
-            {
-                throw new Exception($"❌ Error: Record with APPLICATION_ID = {existingRegistration.ApplId} not found. It may have been deleted.");
-            }
-
-            db.Entry(dbEntity).Reload(); // ✅ Reload entity to avoid concurrency conflicts
-
-            if (actionType == "Edit")
-            {
-                dbEntity.TStatus = "Pending";
-            }
-            else if (actionType == "Approve")
-            {
-                dbEntity.TActive = 1;
-                dbEntity.TStatus = "Approved";
-                dbEntity.RejectReason = null;
-
-                if (string.IsNullOrEmpty(dbEntity.TId))
-                {
-                    dbEntity.TId = GenerateNextTId();
-                }
-            }
-            else if (actionType == "Reject")
-            {
-                dbEntity.TActive = 1;
-                dbEntity.TStatus = "Rejected";
-                dbEntity.RejectReason = rejectReason;
-            }
-
-            dbEntity.UpdateUser = "System";
-            dbEntity.UpdateDate = DateTime.Now;
-
-            db.Entry(dbEntity).State = EntityState.Modified;
-
-            try
-            {
-                db.SaveChanges();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                System.Diagnostics.Debug.WriteLine($"⚠️ Concurrency issue detected for APPLICATION_ID: {existingRegistration.ApplId}. Retrying update...");
-
-                db.Entry(dbEntity).Reload();
-                db.SaveChanges();
-            }
-        }
 
         private string GenerateNextTId()
         {

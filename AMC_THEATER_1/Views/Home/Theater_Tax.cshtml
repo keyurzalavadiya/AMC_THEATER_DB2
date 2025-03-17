@@ -94,7 +94,7 @@
                             <div class="row g-3 align-items-center">
                                 <div class="col-md-4">
                                     <label for="Theater_Id" class="form-label fw-bold">Theater Id</label>
-                                    <input type="text" id="Theater_Id" name="owner_name" class="form-control w-100" value="@Model.ApplId" readonly required>
+                                    <input type="text" id="Theater_Id" name="owner_name" class="form-control w-100" value="@Model.TId" readonly required>
                                 </div>
                                 <div class="col-md-4">
                                     <label for="Theater_Name" class="form-label fw-bold">Theater Name</label>
@@ -118,7 +118,9 @@
                                 </div>
                                 <div class="row mt-5">
                                     <form action="@Url.Action("ProcessTaxPayment", "Home")" method="post" enctype="multipart/form-data">
-                                        <input type="hidden" name="ApplID" value="@Model.ApplId">
+                                        <input type="hidden" name="TId" value="@Model.TId">
+                                        <input type="hidden" name="ApplId" value="@Model.ApplId">
+
 
                                         <div class="row align-items-end">
                                             <div class="col-md-4">
@@ -134,7 +136,7 @@
                                                 <button id="resetBtn" class="btn btn-secondary w-25">Reset</button>
                                             </div>
                                         </div>
-                                </div>
+</div>
                             </div>
 
                             <table id="screenCapacityTable" class="table table-bordered text-center mt-3">
@@ -142,6 +144,7 @@
                                     <tr>
 
                                         <th class="col-1">Screen</th>
+                                        <th class="col-1">Audience Capacity</th>
                                         <th class="col-1">Rate</th>
                                         <th class="col-1">Type</th>
                                         <th class="col-1">Shows</th>
@@ -166,56 +169,59 @@
                                             lastMonthYear = currentMonthYear;
                                         }
 
-                                        <tr>
-                                            <td class="text-start">
-                                                @Model.Screens[i].ScreenNo
-                                                <input type="hidden" name="Screens[@i].SCREEN_NO" value="@Model.Screens[i].ScreenNo" />
-                                            </td>
+                                <tr>
+                                    <td class="text-start">
+                                        @Model.Screens[i].ScreenNo
+                                        <input type="hidden" name="Screens[@i].SCREEN_NO" value="@Model.Screens[i].ScreenNo" />
+                                    </td>
+                                    <td class="text-start">
+                                        @Model.Screens[i].AudienceCapacity
+                                        <input type="hidden" name="Screens[@i].AudienceCapacity" value="@Model.Screens[i].AudienceCapacity" />
+                                    </td>
+                                    <td>
+                                        <input type="text" class="form-control text-end screenPrice small-input"
+                                               name="Screens[@i].ScreenPrice"
+                                               value="@Model.Screens[i].ScreenPrice"
+                                               readonly />
+                                    </td>
 
-                                            <td>
-                                                <input type="text" class="form-control text-end screenPrice small-input"
-                                                       name="Screens[@i].ScreenPrice"
-                                                       value="@Model.Screens[i].ScreenPrice"
-                                                       readonly />
-                                            </td>
+                                    <td data-type="@Model.Screens[i].ScreenType">
+                                        <input type="hidden" name="Screens[@i].ScreenType" value="@Model.Screens[i].ScreenType" />
+                                        @Model.Screens[i].ScreenType
+                                    </td>
 
-                                            <td data-type="@Model.Screens[i].ScreenType">
-                                                <input type="hidden" name="Screens[@i].ScreenType" value="@Model.Screens[i].ScreenType" />
-                                                @Model.Screens[i].ScreenType
-                                            </td>
+                                    <td>
+                                        <input type="number" class="form-control text-end totalShow small-input"
+                                               name="Screens[@i].TotalShow"
+                                               data-index="@i"
+                                               value="@Model.Screens[i].TotalShow"
+                                               oninput="calculateActualShow(@i)" />
+                                    </td>
 
-                                            <td>
-                                                <input type="number" class="form-control text-end totalShow small-input"
-                                                       name="Screens[@i].TotalShow"
-                                                       data-index="@i"
-                                                       value="@Model.Screens[i].TotalShow"
-                                                       oninput="calculateActualShow(@i)" />
-                                            </td>
+                                    <td>
+                                        <input type="number" class="form-control text-end cancelShow small-input"
+                                               name="Screens[@i].CancelShow"
+                                               data-index="@i"
+                                               value="@Model.Screens[i].CancelShow"
+                                               oninput="calculateActualShow(@i)" />
+                                    </td>
 
-                                            <td>
-                                                <input type="number" class="form-control text-end cancelShow small-input"
-                                                       name="Screens[@i].CancelShow"
-                                                       data-index="@i"
-                                                       value="@Model.Screens[i].CancelShow"
-                                                       oninput="calculateActualShow(@i)" />
-                                            </td>
+                                    <td>
+                                        <input type="number" class="form-control text-end actualShow small-input"
+                                               name="Screens[@i].ActualShow"
+                                               id="actualShow_@i"
+                                               value="@Model.Screens[i].ActualShow"
+                                               readonly />
+                                    </td>
 
-                                            <td>
-                                                <input type="number" class="form-control text-end actualShow small-input"
-                                                       name="Screens[@i].ActualShow"
-                                                       id="actualShow_@i"
-                                                       value="@Model.Screens[i].ActualShow"
-                                                       readonly />
-                                            </td>
-
-                                            <td>
-                                                <input type="text" class="form-control text-end amount small-input"
-                                                       name="Screens[@i].AmtPerScreen"
-                                                       id="amtPerScreen_@i"
-                                                       value="@Model.Screens[i].AmtPerScreen"
-                                                       readonly />
-                                            </td>
-                                        </tr>
+                                    <td>
+                                        <input type="text" class="form-control text-end amount small-input"
+                                               name="Screens[@i].AmtPerScreen"
+                                               id="amtPerScreen_@i"
+                                               value="@Model.Screens[i].AmtPerScreen"
+                                               readonly />
+                                    </td>
+                                </tr>
                                     }
                                 </tbody>
 
@@ -223,7 +229,7 @@
 
                                 <tfoot>
                                     <tr>
-                                        <td colspan="5" class="text-danger">Calculate by Actual Shows × Rate = Amount</td>
+                                        <td colspan="6" class="text-danger">Calculate by Actual Shows × Rate = Amount</td>
                                         <td class="text-end fw-bold">Total Amount:</td>
                                         <td id="totalAmount" class="fw-bold text-end">₹0</td>
                                     </tr>

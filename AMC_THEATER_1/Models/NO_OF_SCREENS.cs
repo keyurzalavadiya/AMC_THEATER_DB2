@@ -14,6 +14,12 @@ public class NO_OF_SCREENS
     [Column("SCREEN_NO")]
     public int ScreenNo { get; set; }  // Not nullable ✅
 
+
+    [Column("T_ID")]
+    public string TId { get; set; }  // Unique Identifier (Not Primary Key)
+
+
+
     [ForeignKey("TRN_REGISTRATION")]
     [Column("APPL_ID")]
     public int ApplId { get; set; }  // ✅ Foreign Key referencing TRN_REGISTRATION (Not nullable)
