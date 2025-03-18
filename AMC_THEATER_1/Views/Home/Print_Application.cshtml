@@ -33,7 +33,7 @@
                 font-size: 12px;
                 padding: 1px;
             }
-            .print-btn, .back-btn {
+            .print-btn, .back-btn, .download-btn {
                 display: none;
             }
           
@@ -53,7 +53,7 @@
             </a>
             <div class="flex-grow-1 text-center">
                 <h3 class="mt-2">Ahmedabad Municipal Corporation</h3>
-                <small  class="mb-0">Mahanagar Seva Sadan, Sardar Patel Bhavan, Danapith Ahmedabad - 380001, Gujarat, India</small>
+                <small class="mb-0">Mahanagar Seva Sadan, Sardar Patel Bhavan, Danapith Ahmedabad - 380001, Gujarat, India</small>
             </div>
         </div>
 
@@ -62,8 +62,8 @@
         <h5 class="text-center line">Theater Registration Application</h5>
         <table class="table table-bordered">
             <tr>
-                <th>Application No</th>
-                <td colspan="2">@Model.ApplId</td>
+                <th>Theater ID</th>
+                <td colspan="2">@Model.T_ID</td>
                 <th>Application Date</th>
                 <td>@(Model.CreateDate?.ToString("dd-MMM-yyyy"))</td>
             </tr>
@@ -145,6 +145,7 @@
             }
         </div>
         <button class="btn btn-primary print-btn" onclick="printApplication()">Print</button>
+        <button class="btn btn-success download-btn" onclick="downloadPDF()">Download</button>
         <button type="button" class="btn btn-secondary back-btn" onclick="window.location.href='List_of_Application.cshtml'">Back</button>
     </div>
     <script>
@@ -153,5 +154,45 @@
         }
         window.onload = makeFieldsReadOnly;
     </script>
+    <script>
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            let doc = new jsPDF('p', 'mm', 'a4');
+
+            // Hide buttons before capturing the page
+            document.querySelectorAll(".download-btn, .print-btn, .back-btn").forEach(btn => {
+                btn.style.display = "none";
+            });
+
+            html2canvas(document.querySelector(".container")).then(canvas => {
+                let imgData = canvas.toDataURL("image/png");
+                let imgWidth = 210; // A4 width in mm
+                let pageHeight = 297; // A4 height in mm
+                let imgHeight = (canvas.height * imgWidth) / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 10; // Margin from top
+
+                doc.addImage(imgData, 'PNG', 10, position, imgWidth - 20, imgHeight);
+                heightLeft -= pageHeight;
+
+                while (heightLeft > 0) {
+                    position = heightLeft - imgHeight;
+                    doc.addPage();
+                    doc.addImage(imgData, 'PNG', 10, position, imgWidth - 20, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+
+                doc.save('Theater_Application.pdf');
+
+                // Show buttons again after saving
+                document.querySelectorAll(".download-btn, .print-btn, .back-btn").forEach(btn => {
+                    btn.style.display = "inline";
+                });
+            });
+        }
+
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </body>
 </html>

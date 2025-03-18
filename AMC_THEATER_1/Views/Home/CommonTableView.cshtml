@@ -190,11 +190,12 @@
                                             if (theater.T_STATUS.Trim().ToLower() == "approved")
                                             {
                                                 <!-- Show Print button only when status is "Approved" -->
-                                                <a href="@Url.Action("Edit", "Registration", new { id = theater.ApplId, mode="print" })"
-                                                class="btn btn-secondary btn-sm" title="View">
-                                                <i class="fa fa-eye"></i>
+                                                <a href="@Url.Action("Print_Application", "Home", new { id = theater.ApplId, mode = "print" })"
+                                                   class="btn btn-secondary btn-sm" title="View">
+                                                    <i class="fa fa-eye"></i>
                                                 </a>
                                             }
+
 
                                             else
                                             {

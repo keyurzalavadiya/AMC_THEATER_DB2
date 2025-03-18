@@ -440,27 +440,7 @@
 
                         <button type="button" class="btn btn-secondary" onclick="window.history.back()">Back</button>
                     }
-                    else if (ViewBag.Mode == "print")
-                    {
-                        ViewBag.ShowBasicNavbar = false;
-                        ViewBag.ShowNavbar = true;
-                        ViewBag.ShowSideBar = false;
-                        ViewBag.ShowSideBar1 = true;
-                        ViewBag.Login = false;
-                        ViewBag.ShowHomeIcon = true;
-                        ViewBag.Module = true;
-                        ViewBag.IsViewPAge = true;
-                        @Html.HiddenFor(m => m.ApplId)
-                        <button type="button" class="btn btn-success" onclick="location.href='@Url.Action("Print_Application", "Home", new { id = Model.ApplId,  mode = "print"  })'">
-                            Print
-                        </button>
-
-                        <button type="button" class="btn btn-secondary" onclick="window.history.back()">Back</button>
-
-
-
-
-                    }
+                
                     else if (ViewBag.Mode == "approve")
                     {
                         ViewBag.ShowBasicNavbar = false;
@@ -967,65 +947,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 </script>
-<script>
-function printApplication() {
-    var printUrl = '@Url.Action("Print_Application", "Home", new { mode = "print" })'; // Ensure the URL is correct
-    var printWindow = window.open(printUrl, '_blank');
 
-    if (!printWindow) {
-        alert("Popup blocked! Please allow popups and try again.");
-        return;
-    }
-
-    var checkLoad = setInterval(function () {
-        try {
-            if (printWindow.document.readyState === 'complete') {
-                clearInterval(checkLoad);
-                var doc = printWindow.document;
-
-                // Inject print-specific CSS
-                var style = doc.createElement('style');
-                style.innerHTML = `
-                    @@media print {
-                        body { margin: 0; padding: 0; font-size: 9px; }
-                        .application-form { width: 100%; border-collapse: collapse; }
-                        .application-form th, .application-form td { border: 1px solid black; padding: 2px; word-wrap: break-word; }
-                        .hide-on-print { display: none !important; }
-                        @@page { size: A4 portrait; margin: 5mm; }
-                        input, textarea, select { font-size: 9px !important; border: none; }
-                    }
-                `;
-                doc.head.appendChild(style);
-
-                // Hide unwanted elements
-                var elementsToHide = doc.querySelectorAll('.sidebar, .navbar, button:not(.cancel-btn)');
-                elementsToHide.forEach(el => el.style.display = 'none');
-
-                // Make form fields read-only
-                var inputs = doc.querySelectorAll("input, textarea, select");
-                inputs.forEach(element => {
-                    element.setAttribute("readonly", "true");
-                    element.style.pointerEvents = "none";
-                });
-
-                // Print and close window after printing
-                printWindow.onafterprint = function () {
-                    printWindow.close();
-                };
-                printWindow.print();
-            }
-        } catch (e) {
-            console.error("Error accessing the print window:", e);
-            clearInterval(checkLoad);
-        }
-    }, 500);
-}
-
-// Function to cancel print and return to print mode
-function cancelPrint() {
-    window.location.href = '@Url.Action("Print_Application", "Home", new { mode = "print" })';
-}
-</script>
 
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
