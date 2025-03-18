@@ -129,6 +129,8 @@ namespace AMC_THEATER_1.Controllers
 
                         if (model.ApplId == 0) // New Registration
                         {
+                            model.CreateDate = DateTime.Now;
+                            model.CreateUser = "System";
                             if (!string.IsNullOrEmpty(Request.Form["OfflineTaxPaidYear"]) && int.TryParse(Request.Form["OfflineTaxPaidYear"], out int year))
                             {
                                 model.OfflineTaxPaidYear = new DateTime(year, 1, 1);

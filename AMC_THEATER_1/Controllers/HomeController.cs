@@ -68,7 +68,7 @@ namespace Amc_theater.Controllers
                 T_TENAMENT_NO = registration.TTenamentNo,
                 T_WARD = registration.TWard,
                 T_ZONE = registration.TZone,
-                T_OWNER_NAME = registration.ManagerName,
+                T_OWNER_NAME = registration.LicenseHolderName,
                 T_OWNER_EMAIL = registration.TEmail,
                 T_COMMENCEMENT_DATE = registration.TCommencementDate,
                 T_ADDRESS = registration.TAddress,
