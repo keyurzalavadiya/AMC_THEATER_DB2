@@ -1,11 +1,11 @@
-﻿@model AMC_THEATER_1.Models.TheaterViewModel
+﻿@using AMC_THEATER_1.Models
+@model AMC_THEATER_1.Models.TheaterViewModel
 
 @{
     ViewBag.Title = "Print_Application";
+    var uploadedDocs = ViewBag.UploadedDocs as List<UploadedDocViewModel> ?? new List<UploadedDocViewModel>();
+
 }
-
-<h2>Print_Application</h2>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,13 +13,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Theater Registration Application</title>
     <style>
+        /* General Styling */
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
         }
 
         .container {
-            width: 100% !important;
+            width: 100%;
+            max-width: 1100px; /* Ensures it fits within a standard layout */
+            margin: auto;
         }
 
         table {
@@ -33,45 +36,63 @@
             text-align: left;
         }
 
-        .submit-btn, .print-btn {
-            margin-top: 10px;
-            background-color: #007BFF;
-            color: white;
-            padding: 10px;
-            border: none;
-            cursor: pointer;
+        input[type="text"],
+        input[type="email"],
+        input[type="number"],
+        input[type="date"],
+        input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
         }
 
+        .submit-btn, .print-btn {
+            margin-top: 15px;
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+            .submit-btn:hover, .print-btn:hover {
+                background-color: #0056b3;
+            }
+
+        /* Table Layout */
         .table-container {
             display: flex;
             justify-content: space-between;
+            width: 100%;
         }
 
             .table-container table:first-child {
-                width: 55.8%;
+                width: 49.3%; /* Ensures alignment with the main table */
             }
 
             .table-container table:last-child {
-                width: 50%;
+                width: 51%; /* Adjusted to align better */
             }
 
+        /* Print-Specific Styles */
         @@media print {
             body, html {
                 height: 100%;
                 margin: 0;
                 padding: 0;
                 display: flex;
-                justify-content: left;
+                justify-content: center;
                 align-items: center;
             }
 
             .container {
-                width: 100% !important;
+                width: 100%;
+                max-width: 800px; /* Ensures it fits within an A4 width */
                 margin: auto;
                 text-align: center;
-                transform: translateY(0%);
                 position: relative;
-                top: 0;
             }
 
             .table-container {
@@ -80,16 +101,22 @@
                 width: 100%;
             }
 
-                .table-container table {
-                    width: 50%; /* Maintain the same width as on screen */
-                    margin: auto;
-                    border-collapse: collapse;
+                .table-container table:first-child {
+                    width: 49.3%; /* Ensures print formatting fits within A4 */
+                }
+
+                .table-container table:last-child {
+                    width: 51%; /* Adjusted for print layout */
                 }
 
             th, td {
                 border: 1px solid black;
-                padding: 10px;
-                text-align: left;
+                padding: 2px; /* Reduced padding for better print fit */
+                font-size: 12px; /* Reduce font size to save space */
+            }
+
+            table {
+                width: 100%; /* Ensure tables use available width */
             }
 
             .submit-btn, .print-btn {
@@ -97,6 +124,7 @@
             }
         }
     </style>
+
 
 
     <script>
@@ -107,27 +135,32 @@
 </head>
 <body>
     <div class="container">
-        <h2>Ahmedabad Municipal Corporation</h2>
-        <h3>Application Form</h3>
+        <div style="display: flex; align-items: center; margin-bottom:20px;">
+            <a href="https://ahmedabadcity.gov.in/" target="_blank">
+                <img src="~/Img/amc-logo.png" alt="AMC Logo" width="70">
+            </a>
+            <h4 style="margin-left: 10px;">Ahmedabad Municipal Corporation</h4>
+            <h4 class="te">Theater Tax</h4>
+        </div>
 
         <table>
             <tr>
                 <th>Application No</th>
-                <td colspan="2"><input type="text" name="application_no"></td>
+                <td colspan="2"><input type="text" name="application_no" value=" @Model.ApplId"></td>
                 <th>Application Date</th>
-                <td><input type="date" name="application_date" value=" @Model.ApplId"></td>
+                <td><input type="text" name="contact_no" value="@(Model.CreateDate?.ToString("dd-MM-yyyy"))"></td>
             </tr>
             <tr>
                 <th>Theater Name</th>
                 <td colspan="2"><input type="text" name="theater_name" value="@Model.T_NAME"></td>
                 <th>License Holder’s Name</th>
-                <td><input type="text" name="license_holder"  value="@Model.T_OWNER_NAME"></td>
+                <td><input type="text" name="license_holder" value="@Model.ManagerName"></td>
             </tr>
             <tr>
                 <th>Address</th>
                 <td colspan="2"><input type="text" name="address" value="@Model.T_ADDRESS"></td>
                 <th>Representatives’ Name</th>
-                <td><input type="text" name="representative_name" value="@Model.T_OWNER_NAME"></td>
+                <td><input type="text" name="representative_name" value="@Model.ManagerName"></td>
             </tr>
             <tr>
                 <th rowspan="2">Contact Details</th>
@@ -140,21 +173,21 @@
             </tr>
             <tr>
                 <th>Commencement Date</th>
-                <td colspan="2"><input type="date" name="commencement_date" value="@Model.T_COMMENCEMENT_DATE"></td>
+                <td colspan="2"><input type="text" name="contact_no" value="@(Model.T_COMMENCEMENT_DATE?.ToString("dd-MM-yyyy"))"></td>
                 <th>License Date</th>
-                <td><input type="date" name="license_date" value="@Model.T_COMMENCEMENT_DATE"></td>
+                <td><input type="text" name="contact_no" value="@(Model.LicenseDate?.ToString("dd-MM-yyyy"))"></td>
             </tr>
             <tr>
                 <th>Zone</th>
-                <td><input type="text" name="zone" value="@Model.T_ZONE"></td>
+                <td colspan="2"><input type="text" name="zone" value="@Model.T_ZONE"></td>
                 <th>Ward</th>
-                <td colspan="2"><input type="text" name="ward" value="@Model.T_CITY"></td>
+                <td colspan="2"><input type="text" name="zone" value="@Model.T_WARD"></td>
             </tr>
             <tr>
                 <th>Tenement Nos.</th>
                 <td colspan="2"><input type="text" name="tenement_no" value="@Model.T_TENAMENT_NO"></td>
                 <th>PEC/PRC No.</th>
-                <td><input type="text" name="pec_prc_no" value="@Model.T_CITY"></td>
+                <td><input type="text" name="pec_prc_no" value="@Model.T_PEC_NO,@Model.T_PRC_NO"></td>
             </tr>
         </table>
 
@@ -165,16 +198,7 @@
                     <th>Type</th>
                     <th>Seat Capacity</th>
                 </tr>
-                @*<tr>
-                <td><input type="text" name="screen_no"></td>
-                <td><input type="text" name="type"></td>
-                <td><input type="number" name="seat_capacity"></td>
-            </tr>*@
-                @*<tr>
-                <td><input type="text" name="screen_no"></td>
-                <td><input type="text" name="type"></td>
-                <td><input type="number" name="seat_capacity"></td>
-            </tr>*@
+
                 @foreach (var screen in Model.Screens)
                 {
                     <tr>
@@ -184,20 +208,24 @@
                     </tr>
                 }
             </table>
-            @if (ViewBag.UploadedDocs != null && ViewBag.UploadedDocs.Count > 0)
-            {
 
-        <table>
-            <tr>
-                <th>Uploaded Documents</th>
-            </tr>
-            <tr>
-                <td><input type="file" name="documents"></td>
-            </tr>
-            <tr>
-                <td><input type="file" name="documents"></td>
-            </tr>
-        </table>
+
+            @if (uploadedDocs.Any()) // Using Any() instead of Count > 0 for better performance
+            {
+                <table>
+                    <tr>
+                        <th>Uploaded Documents</th>
+                    </tr>
+                    <tbody>
+                        @foreach (var doc in uploadedDocs)
+                        {
+                            <tr>
+                                <td>@doc.DocName</td>
+
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             }
         </div>
 
@@ -206,3 +234,15 @@
     </div>
 </body>
 </html>
+<script>
+    function makeFieldsReadOnly() {
+        let inputs = document.querySelectorAll("input");
+        inputs.forEach(input => {
+            input.setAttribute("readonly", true);
+        });
+    }
+
+    window.onload = makeFieldsReadOnly; // Call function when page loads
+</script>
+
+

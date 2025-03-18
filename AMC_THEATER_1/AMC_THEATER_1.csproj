@@ -130,7 +130,6 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
-    <Compile Include="Controllers\DocumentViewModel.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\RegistrationController.cs" />
     <Compile Include="Global.asax.cs">
@@ -154,6 +153,7 @@
     <Compile Include="Models\THEATER_TAX_PAYMENT.cs" />
     <Compile Include="Models\TRN_REGISTRATION.cs" />
     <Compile Include="Models\TRN_THEATRE_DOCS.cs" />
+    <Compile Include="Models\UploadedDocViewModel.cs" />
     <Compile Include="Models\USER_LOGIN_DETAILS.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

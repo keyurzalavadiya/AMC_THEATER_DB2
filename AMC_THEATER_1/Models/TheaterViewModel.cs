@@ -42,17 +42,33 @@ namespace AMC_THEATER_1.Models
         [Column("T_OWNER_NAME")]
         public string T_OWNER_NAME { get; set; }
 
-        [Column("T_OWNER_NUMBER")]
-        public string T_OWNER_NUMBER { get; set; }
+        [Column("ManagerContactNo")]
+        public int T_OWNER_NUMBER { get; set; }
 
         [Column("T_OWNER_EMAIL")]
         public string T_OWNER_EMAIL { get; set; }
 
-        [Column("T_COMMENCEMENT_DATE")]
-        public DateTime? T_COMMENCEMENT_DATE { get; set; }
-
+      
         [Column("T_ADDRESS")]
         public string T_ADDRESS { get; set; }
+
+        [Column("T_PEC_NO")]
+        public string T_PEC_NO { get; set; }
+
+        [Column("MANAGER_NAME")]
+        public string ManagerName { get; set; }
+
+        [Column("T_PRC_NO")]
+        public string T_PRC_NO { get; set; }
+
+        [Column("LicenseDate")]
+        public DateTime? LicenseDate { get; set; }
+
+        [Column("T_COMMENCEMENT_DATE")]
+        public DateTime? T_COMMENCEMENT_DATE { get; set; }
+        [Column("CREATE_DATE")]
+        public DateTime? CreateDate { get; set; }
+
 
         [Column("UPDATE_DATE")]
         public DateTime? UPDATE_DATE { get; set; }

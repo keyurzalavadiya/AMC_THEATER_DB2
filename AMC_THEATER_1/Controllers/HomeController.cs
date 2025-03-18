@@ -22,6 +22,8 @@ namespace Amc_theater.Controllers
     {
         readonly ApplicationDbContext db = new ApplicationDbContext();
 
+      
+
         public ActionResult Print_Application(int? id, string mode = "print")
         {
             if (id == null)
@@ -37,6 +39,19 @@ namespace Amc_theater.Controllers
                 return RedirectToAction("List_of_Application", "Home");
             }
 
+            // ✅ Fetch uploaded documents with their names
+            var uploadedDocs = (from d in db.TRN_THEATRE_DOCS
+                                join m in db.MST_DOCS on d.DocId equals m.DocId
+                                where d.ApplId == id && !string.IsNullOrEmpty(d.DocFilePath)
+                                select new UploadedDocViewModel
+                                {
+                                    DocId = d.DocId,
+                                    DocFilePath = d.DocFilePath,
+                                    DocName = m.DocName
+                                }).ToList();
+
+            ViewBag.UploadedDocs = uploadedDocs;
+
             // ✅ Map TRN_REGISTRATION to TheaterViewModel
             var viewModel = new TheaterViewModel
             {
@@ -48,11 +63,15 @@ namespace Amc_theater.Controllers
                 T_WARD = registration.TWard,
                 T_ZONE = registration.TZone,
                 T_OWNER_NAME = registration.ManagerName,
-                //T_OWNER_NUMBER = registration.ManagerContactNo,
                 T_OWNER_EMAIL = registration.TEmail,
                 T_COMMENCEMENT_DATE = registration.TCommencementDate,
                 T_ADDRESS = registration.TAddress,
-                //UPDATE_DATE = registration.UPDATE_DATE,
+                CreateDate = registration.CreateDate,
+                ManagerName = registration.ManagerName,
+                T_PEC_NO = registration.TPecNo,
+                T_PRC_NO= registration.TPrcNo,
+                LicenseDate = registration.LicenseDate,
+                T_OWNER_NUMBER = (int)registration.ManagerContactNo,
 
                 // Fetch related data
                 Screens = db.NO_OF_SCREENS
@@ -65,7 +84,7 @@ namespace Amc_theater.Controllers
                             })
                             .ToList(),
 
-                ScreenTypes = db.MST_TT_TYPE.ToList(), // If needed
+                ScreenTypes = db.MST_TT_TYPE.ToList(),
                 IsEditMode = (mode == "print"),
             };
 
