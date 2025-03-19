@@ -19,6 +19,29 @@
         .container {
             font-size: 15px;
         }
+        .table-borderless tbody tr td {
+            border-bottom: 1px dotted black;
+        }
+
+        .table-borderless thead tr th {
+            border-bottom: 2px solid black;
+        }
+
+        .table-total {
+            border-top: 2px solid black;
+        }
+
+        .amount-text {
+            font-weight: bold;
+        }
+
+        .receipt-container {
+            max-width: 800px;
+            background: #fff;
+            padding: 20px;
+            border: 1px solid #000;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
 <body class="bg-light py-4">
@@ -35,14 +58,14 @@
                     <!-- Logo -->
                     <div>
                         <img src="~/Img/amc-logo.png"
-                             alt="Amdavad Municipal Corporation" width="90" id="receipt-logo">
+                             alt="Ahmedabad Municipal Corporation" width="90" id="receipt-logo">
                     </div>
 
                     <!-- Header and Theater Tax Info (Side by Side with Logo) -->
                     <div class="d-flex flex-column ms-1">
                         <!-- Header -->
                         <h6 class="text-uppercase fw-bold pb-1 mb-2 text-start">
-                            Amdavad Municipal Corporation
+                            Ahmedabad Municipal Corporation
                         </h6>
 
                         <!-- Theater Tax Details -->
@@ -96,49 +119,45 @@
 
             <hr class="border-2 border-dark">
 
-            <!-- Table -->
             <div class="table-responsive">
-                <table class="table table-sm table-bordered text-center">
-                    <thead class="table-light">
+                <table class="table table-borderless text-center">
+                    <thead>
                         <tr>
-                            <th scope="col">No</th>
-                            <th scope="col">Month</th>
-                            <th scope="col">Year</th>
-                            <th scope="col">Amount</th>
+                            <th class="text-start">Tax Details</th>
+                            <th>Arrears (Rs.)</th>
+                            <th>Current (Rs.)</th>
+                            <th>Total</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <th scope="row">1</th>
-                            <td>January</td>
-                            <td>2024</td>
-                            <td class="text-end">₹1,500</td>
+                            <td class="text-start">THEATER TAX INCOME</td>
+                            <td>0.00</td>
+                            <td>400.00</td>
+                            <td>400.00</td>
                         </tr>
                         <tr>
-                            <th scope="row">2</th>
-                            <td>February</td>
-                            <td>2024</td>
-                            <td class="text-end">₹2,900</td>
+                            <td class="text-start">INTEREST</td>
+                            <td>0.00</td>
+                            <td>0.00</td>
+                            <td>0.00</td>
                         </tr>
                         <tr>
-                            <th scope="row">3</th>
-                            <td>March</td>
-                            <td>2024</td>
-                            <td class="text-end">₹1,200</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">4</th>
-                            <td>April</td>
-                            <td>2024</td>
-                            <td class="text-end">₹3,500</td>
+                            <td class="text-start">PENALTY</td>
+                            <td>0.00</td>
+                            <td>0.00</td>
+                            <td>0.00</td>
+
                         </tr>
                     </tbody>
                     <tfoot>
-                        <tr>
-                            <td colspan="3" class="text-end fw-bold">TOTAL</td>
-                            <td class="fw-bold text-end">₹9,100</td>
+                        <tr class="table-total">
+                            <td colspan="3" class="text-start amount-text">Four Hundred Rupees Only</td>
+                            <td colspan="3" class="text-center amount-text ">₹400.00</td>
                         </tr>
+                      
                     </tfoot>
+
                 </table>
             </div>
 

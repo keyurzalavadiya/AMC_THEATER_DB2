@@ -187,25 +187,22 @@
                                         }
                                         else
                                         {
-                                            if (theater.T_STATUS.Trim().ToLower() == "approved")
+                                            if (theater.T_STATUS.Trim().ToLower() == "pending")
                                             {
-                                                <!-- Show Print button only when status is "Approved" -->
-                                    <a href="@Url.Action("Print_Application", "Home", new { id = theater.ApplId, mode = "print" })"
-                                       class="btn btn-secondary btn-sm" title="Print / Download">
-                                        <i class="fa fa-print"></i> / <i class="fa fa-download"></i>
-                                    </a>
+                                                <!-- Show Print button when status is "Pending" -->
+                                                <a href="@Url.Action("Print_Application", "Home", new { id = theater.ApplId, mode = "print" })"
+                                                   class="btn btn-secondary btn-sm" title="Print / Download">
+                                                    <i class="fa fa-print"></i> / <i class="fa fa-download"></i>
+                                                </a>
                                             }
 
-
-                                            else
+                                            if (theater.T_STATUS.Trim().ToLower() == "approved" || theater.T_STATUS.Trim().ToLower() == "reject")
                                             {
-                                                <!-- Show Edit and Delete buttons when status is not Approved or Rejected -->
-                                                <a href="@Url.Action("Edit", "Registration", new { id = theater.ApplId, mode = "edit" })"
-                                                   class="btn btn-primary btn-sm mb-2 w-100">Edit</a>
-                                                <button type="button" onclick="confirmSoftDelete('@theater.T_ID')"
-                                                        class="btn btn-danger btn-sm">
-                                                    Delete
-                                                </button>
+                                                <!-- Show View button when status is "Approved" or "Reject" -->
+                                                <a href="@Url.Action("Edit", "Registration", new { id = theater.ApplId, mode = "view" })"
+                                                   class="btn btn-primary btn-sm" title="View">
+                                                    <i class="fa fa-eye"></i>
+                                                </a>
                                             }
                                         }
                                     </td>
