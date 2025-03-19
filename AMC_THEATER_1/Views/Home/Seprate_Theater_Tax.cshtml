@@ -35,7 +35,7 @@
         .container {
             max-width: 90%;
             padding: 0 15px;
-            margin-left: 70px;
+            margin-left: 60px;
             transition: margin-left 0.3s;
             padding: 15px;
         }
@@ -48,6 +48,18 @@
             background-color: #28a745;
             color: white;
         }
+        #suggestions {
+            top: 100%; /* Align below input */
+            left: 0;
+            z-index: 1000;
+            max-height: 200px; /* Prevent overflow */
+            overflow-y: auto;
+            display: none; /* Hidden by default */
+            border: 1px solid #ccc;
+            background-color: white;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
     </style>
 
 </head>
@@ -64,26 +76,31 @@
                     <form action="@Url.Action("Seprate_Theater_Tax", "Home")" method="post">
                         <div class="mb-4 ms-5">
                             <div class="d-flex align-items-center justify-content-between">
-                                <div class="d-flex mt-4 align-items-center">
-                                    <input type="text" id="theater_id" name="theater_id"
-                                           class="form-control me-2 w-100 text-center"
-                                           placeholder="Enter Theater ID"
-                                           value="@Request.Form["theater_id"]" required> <!-- ✅ Retains input value -->
+                                <div class="mb-3 mt-3">
+                                    <label for="theater_id" class="fw-bold">Theater Id</label>
+                                    <div class="input-group position-relative" style="max-width: 250px;">
+                                        <input type="text" id="theater_id" name="theater_id"
+                                               class="form-control text-center"
+                                               placeholder="Enter Theater ID"
+                                               value="@Request.Form["theater_id"]"
+                                               autocomplete="off" required>
 
-                                    <button type="submit" class="btn btn-secondary">
-                                        <i class="fas fa-search"></i>
-                                    </button>
+                                        <!-- Dropdown Suggestions -->
+                                        <div id="suggestions" class="dropdown-menu w-100 position-absolute"></div>
+
+                                        <button type="submit" class="btn btn-secondary">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="text-end">
-                                    <a href="@Url.Action("SearchID", "Home")" id="forgotIdLink" class="btn pe-3 ps-3 mt-3 w-2me-5 btn-secondary">Search ID</a>
+                                    <a href="@Url.Action("SearchID", "Home")" id="forgotIdLink"
+                                       class="btn pe-3 ps-3 mt-3 w-2me-5 btn-secondary">Search ID</a>
                                 </div>
                             </div>
                         </div>
+
                     </form>
-
-
-
-
 
                     <div class="mb-4">
                         <h4 class="fw-bold text-center bg-light mt-3 p-3">Basic Information</h4>
@@ -100,16 +117,16 @@
                             <div class="row g-3 align-items-center">
                                 <div class="col-md-4">
                                     <label for="Theater_Id" class="form-label fw-bold">Theater Id</label>
-                                    <input type="text" id="Theater_Id" name="owner_name" class="form-control w-100" value="@Model.ApplId" readonly required>
+                                    <input type="text" id="Theater_Id" name="owner_name" class="form-control w-100" value="@Model.TId" readonly required>
                                 </div>
                                 <div class="col-md-4">
                                     <label for="Theater_Name" class="form-label fw-bold">Theater Name</label>
                                     <input type="text" id="Theater_Name" name="Theater_Name" class="form-control w-100" value="@Model.TheaterName" readonly required>
                                 </div>
-                                <div class="col-md-4">
-                                    <label for="owner_name" class="form-label fw-bold">Owner Name</label>
-                                    <input type="text" id="owner_name" name="owner_name" class="form-control w-100" value="@Model.OwnerName" readonly required>
-                                </div>
+                                @*<div class="col-md-4">
+                                        <label for="owner_name" class="form-label fw-bold">Owner Name</label>
+                                        <input type="text" id="owner_name" name="owner_name" class="form-control w-100" value="@Model.OwnerName" readonly required>
+                                    </div>*@
                                 <div class="col-md-4">
                                     <label for="mobile_no" class="form-label fw-bold">Mobile No</label>
                                     <input type="text" id="mobile_no" name="mobile_no" class="form-control w-100" value="@Model.MobileNo" readonly required>
@@ -124,25 +141,28 @@
                                 </div>
                                 <div class="row mt-5">
                                     <form action="@Url.Action("ProcessTaxPaymentSeprate", "Home")" method="post" enctype="multipart/form-data">
-                                        <input type="hidden" name="TheaterId" value="@Model.ApplId">
+                                        <input type="hidden" name="TId" value="@Model.TId">
+                                        <input type="hidden" name="ApplId" value="@Model.ApplId">
+
 
                                         <div class="row align-items-end">
                                             <div class="col-md-4">
                                                 <label for="fromDate" class="form-label fw-bold">From Month</label>
-                                                <input type="month" id="fromDate" name="FromMonth" class="form-control">
+                                                <input type="month" id="fromDate" name="FromMonth" class="form-control"
+                                                       value="@Request.Form["FromMonth"]">
                                             </div>
+
                                             <div class="col-md-4">
                                                 <label for="toDate" class="form-label ms-3 fw-bold">To Month</label>
-                                                <input type="month" id="toDate" name="ToMonth" class="form-control ms-2">
+                                                <input type="month" id="toDate" name="ToMonth" class="form-control ms-2"
+                                                       value="@Request.Form["ToMonth"]">
                                             </div>
+
                                             <div class="col-md-4">
-                                                <button type="button" class="btn btn-primary ms-5 w-75" id="generateBtn">Generate Table</button>
+                                                <button type="button" class="btn btn-primary ms-5 w-50" id="generateBtn">Generate Table</button>
+                                                <button id="resetBtn" class="btn btn-secondary w-25">Reset</button>
                                             </div>
                                         </div>
-
-
-
-
                                 </div>
                             </div>
 
@@ -151,6 +171,7 @@
                                     <tr>
 
                                         <th class="col-1">Screen</th>
+                                        <th class="col-1">Audience Capacity</th>
                                         <th class="col-1">Rate</th>
                                         <th class="col-1">Type</th>
                                         <th class="col-1">Shows</th>
@@ -159,7 +180,6 @@
                                         <th class="col-1">Amount</th>
                                     </tr>
                                 </thead>
-
                                 <tbody id="tableBody">
                                     @{
                                         string lastMonthYear = "";
@@ -171,19 +191,19 @@
                                         if (currentMonthYear != lastMonthYear)
                                         {
                                             <tr class="table-white">
-                                                @*<td colspan="7" class="fw-bold text-center">@currentMonthYear</td>*@
                                             </tr>
                                             lastMonthYear = currentMonthYear;
                                         }
 
                                         <tr>
                                             <td class="text-start">
-                                                @Model.Screens[i].ScreenId
-                                                <input type="hidden" name="Screens[@i].ScreenId" value="@Model.Screens[i].ScreenId" />
+                                                @Model.Screens[i].ScreenNo
+                                                <input type="hidden" name="Screens[@i].SCREEN_NO" value="@Model.Screens[i].ScreenNo" />
                                             </td>
-
-
-
+                                            <td class="text-start">
+                                                @Model.Screens[i].AudienceCapacity
+                                                <input type="hidden" name="Screens[@i].AudienceCapacity" value="@Model.Screens[i].AudienceCapacity" />
+                                            </td>
                                             <td>
                                                 <input type="text" class="form-control text-end screenPrice small-input"
                                                        name="Screens[@i].ScreenPrice"
@@ -196,29 +216,27 @@
                                                 @Model.Screens[i].ScreenType
                                             </td>
 
-
-
                                             <td>
                                                 <input type="number" class="form-control text-end totalShow small-input"
                                                        name="Screens[@i].TotalShow"
                                                        data-index="@i"
-                                                       oninput="calculateActualShow(@i)"
-                                                       required />
+                                                       value="@Model.Screens[i].TotalShow"
+                                                       oninput="calculateActualShow(@i)" />
                                             </td>
 
                                             <td>
                                                 <input type="number" class="form-control text-end cancelShow small-input"
                                                        name="Screens[@i].CancelShow"
                                                        data-index="@i"
-                                                       oninput="calculateActualShow(@i)"
-                                                       required />
+                                                       value="@Model.Screens[i].CancelShow"
+                                                       oninput="calculateActualShow(@i)" />
                                             </td>
 
                                             <td>
                                                 <input type="number" class="form-control text-end actualShow small-input"
                                                        name="Screens[@i].ActualShow"
                                                        id="actualShow_@i"
-                                                       value="0"
+                                                       value="@Model.Screens[i].ActualShow"
                                                        readonly />
                                             </td>
 
@@ -226,16 +244,18 @@
                                                 <input type="text" class="form-control text-end amount small-input"
                                                        name="Screens[@i].AmtPerScreen"
                                                        id="amtPerScreen_@i"
-                                                       value="0" readonly />
+                                                       value="@Model.Screens[i].AmtPerScreen"
+                                                       readonly />
                                             </td>
                                         </tr>
                                     }
                                 </tbody>
 
 
+
                                 <tfoot>
                                     <tr>
-                                        <td colspan="5" class="text-danger">Calculate by Actual Shows × Rate = Amount</td>
+                                        <td colspan="6" class="text-danger">Calculate by Actual Shows × Rate = Amount</td>
                                         <td class="text-end fw-bold">Total Amount:</td>
                                         <td id="totalAmount" class="fw-bold text-end">₹0</td>
                                     </tr>
@@ -249,42 +269,74 @@
                             </div>
 
                             <div class="col-12 text-center">
-                                <button type="submit" class="btn btn-success m-3 w-25">Submit Payment</button>
+                                <button type="submit" class="btn btn-success m-3 w-25">Proceed For Payment</button>
                             </div>
-
-
-
-
-
-
-
                         </div>
                     }
-
+                    </form>
                 </div>
+
             </div>
+
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById("theater_id").addEventListener("input", function () {
+            let input = this.value.trim();
+            let suggestionsDiv = document.getElementById("suggestions");
 
+            if (input.length === 0) {
+                suggestionsDiv.innerHTML = ""; // Clear suggestions if input is empty
+                suggestionsDiv.style.display = "none"; // Hide dropdown
+                return;
+            }
 
+            fetch(`/Home/GetTheaterSuggestions?query=${input}`) // Adjust API route if needed
+                .then(response => response.json())
+                .then(data => {
+                    suggestionsDiv.innerHTML = ""; // Clear old suggestions
+                    suggestionsDiv.style.display = "block"; // Show dropdown
+
+                    data.forEach(t => {
+                        let suggestionItem = document.createElement("div");
+                        suggestionItem.classList.add("dropdown-item");
+                        suggestionItem.innerHTML = `<strong>${t.TId}</strong> - ${t.TName}`;
+
+                        // On clicking the suggestion, auto-fill input field
+                        suggestionItem.onclick = function () {
+                            document.getElementById("theater_id").value = t.TId;
+                            suggestionsDiv.style.display = "none"; // Hide dropdown after selection
+                        };
+
+                        suggestionsDiv.appendChild(suggestionItem);
+                    });
+                })
+                .catch(error => console.error("Error fetching data:", error));
+        });
+
+        // Hide dropdown when clicking outside
+        document.addEventListener("click", function (event) {
+            let suggestionsDiv = document.getElementById("suggestions");
+            if (!document.getElementById("theater_id").contains(event.target)) {
+                suggestionsDiv.style.display = "none";
+            }
+        });
+
+    </script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             document.getElementById("generateBtn").addEventListener("click", generateTable);
 
-            // Attach event listeners for dynamically updating calculations
             document.addEventListener("input", function (event) {
                 let target = event.target;
                 if (!target.classList.contains("totalShow") &&
                     !target.classList.contains("cancelShow") &&
                     !target.classList.contains("rate")) return;
 
-                // Prevent negative values
-                target.value = Math.max(0, target.value);
-
+                target.value = Math.max(target.value);
                 let row = target.closest("tr");
 
-                // Validate cancelShow (must not exceed totalShow)
                 if (target.classList.contains("cancelShow")) {
                     validateCancelShows(row);
                 }
@@ -302,9 +354,9 @@
 
                 if (cancelShows > totalShows) {
                     errorSpan.innerText = "Canceled shows cannot be more than total shows!";
-                    cancelInput.value = totalShows; // Reset to totalShows if exceeded
+                    cancelInput.value = totalShows;
                 } else {
-                    errorSpan.innerText = ""; // Clear error if valid
+                    errorSpan.innerText = "";
                 }
             }
 
@@ -322,7 +374,6 @@
                 }
             });
         });
-
         function generateTable() {
             let fromDate = document.getElementById("fromDate").value;
             let toDate = document.getElementById("toDate").value;
@@ -376,6 +427,18 @@
             tableBody.prepend(firstMonthRow);
 
             let firstRowUsed = false;
+            let existingScreens = new Map();
+            existingRows.forEach(row => {
+                if (!row.querySelector("td") || row.querySelector("td").colSpan !== 8) {
+                    let screenIdCell = row.querySelector("td:first-child");
+                    if (screenIdCell) {
+                        let screenId = screenIdCell.innerText.trim();
+                        if (screenId) {
+                            existingScreens.set(screenId, row.cloneNode(true));
+                        }
+                    }
+                }
+            });
 
             months.forEach((month, monthIndex) => {
                 if (!existingMonths.has(month) || monthIndex === 0) {
@@ -389,19 +452,6 @@
                         monthRow.appendChild(monthCell);
                         tableBody.appendChild(monthRow);
                     }
-
-                    let existingScreens = new Map();
-                    existingRows.forEach(row => {
-                        if (!row.querySelector("td") || row.querySelector("td").colSpan !== 8) {
-                            let screenIdCell = row.querySelector("td:first-child");
-                            if (screenIdCell) {
-                                let screenId = screenIdCell.innerText.trim();
-                                if (screenId) {
-                                    existingScreens.set(screenId, row.cloneNode(true));
-                                }
-                            }
-                        }
-                    });
 
                     if (!firstRowUsed) {
                         firstRowUsed = true;
@@ -424,7 +474,7 @@
                                     input.setAttribute("data-index", monthIndex);
                                     input.addEventListener("input", function () {
                                         calculateActualShow(clonedRow);
-                                        calculateAmount(clonedRow); // Update amount dynamically
+                                        calculateAmount(clonedRow);
                                     });
                                 }
 
@@ -444,63 +494,186 @@
             calculateTotalAmount();
         }
 
+
+
+
         function calculateActualShow(row) {
             let totalShows = parseInt(row.querySelector(".totalShow")?.value) || 0;
             let cancelShows = parseInt(row.querySelector(".cancelShow")?.value) || 0;
             let actualShow = Math.max(0, totalShows - cancelShows);
             let actualShowField = row.querySelector(".actualShow");
-
             if (actualShowField) {
                 actualShowField.value = actualShow;
             }
-
-            calculateAmount(row); // Update amount when actual show changes
+            calculateAmount(row);
         }
 
         function calculateAmount(row) {
             let actualShow = parseInt(row.querySelector(".actualShow")?.value) || 0;
             let rate = parseFloat(row.querySelector(".screenPrice")?.value) || 0;
             let amountField = row.querySelector(".amount");
-
-            // Check if row is newly added, if so, set amount to 0
-            if (row.dataset.newRow === "true") {
-                amountField.value = "0.00";
-                row.dataset.newRow = "false"; // Reset after first update
-            } else {
-                let amount = actualShow * rate;
-                amountField.value = amount.toFixed(2);
-            }
-
+            let amount = actualShow * rate;
+            amountField.value = amount.toFixed(2);
             calculateTotalAmount();
         }
-
 
         function calculateTotalAmount() {
             let totalAmount = 0;
             document.querySelectorAll(".amount").forEach(input => {
                 totalAmount += parseFloat(input.value) || 0;
             });
-
             document.getElementById("totalAmount").innerText = `₹${totalAmount.toFixed(2)}`;
         }
 
+        //VALIDATION SCRIPT
+        // Disable browser validation
+        document.querySelector("form").setAttribute("novalidate", true);
 
-    </script>
-    <script>
-           document.addEventListener("DOMContentLoaded", function () {
-        let today = new Date();
-        let year = today.getFullYear();
-        let month = String(today.getMonth() + 1).padStart(2, '0'); // Ensures two-digit month
+        // Function to create or fetch an error span next to the input field
+        function createFieldErrorSpan(input) {
+            let errorSpan = input.nextElementSibling;
 
-        let currentMonth = `${year}-${month}`;
+            if (!errorSpan || !errorSpan.classList.contains("error-message")) {
+                errorSpan = document.createElement("span");
+                errorSpan.className = "error-message text-danger small d-block mt-1";
+                input.insertAdjacentElement("afterend", errorSpan);
+            }
 
-        document.getElementById("fromDate").value = currentMonth;
-        document.getElementById("toDate").value = currentMonth;
+            return errorSpan;
+        }
 
-        // Generate table automatically with the default month
-        generateTable();
-    });
+        // Function to validate an input field
+        function validateInput(input) {
+            let value = input.value.trim();
+            let errorSpan = createFieldErrorSpan(input);
+            let numericValue = parseFloat(value);
 
+            // Reset error message
+            errorSpan.innerText = "";
+            input.classList.remove("is-invalid");
+
+            // General validation: Must not be empty and must be a valid number
+            if (!value || isNaN(numericValue)) {
+                errorSpan.innerText = "This field is required!";
+                input.classList.add("is-invalid");
+                return false;
+            }
+
+            // Prevent negative numbers
+            if (numericValue < 0) {
+                errorSpan.innerText = "Negative values are not allowed!";
+                input.classList.add("is-invalid");
+                return false;
+            }
+
+            // Special validation for "Total Show" (must be at least 1)
+            if (input.classList.contains("totalShow") && numericValue < 0) {
+                errorSpan.innerText = "Total Show must be at least 0!";
+                input.classList.add("is-invalid");
+                return false;
+            }
+
+            // If all validations pass, clear the error
+            errorSpan.innerText = "";
+            input.classList.remove("is-invalid");
+            return true;
+        }
+
+        // Attach real-time validation (Event Delegation for dynamic rows)
+        document.addEventListener("input", function (event) {
+            if (event.target.matches(".totalShow, .cancelShow, .rate")) {
+                validateInput(event.target);
+            }
+        });
+
+        // Validate inputs on form submission
+        document.querySelector(".btn-success").addEventListener("click", function (event) {
+            let inputs = document.querySelectorAll(".totalShow, .cancelShow, .rate");
+            let isFormValid = true;
+
+            for (let input of inputs) {
+                if (!validateInput(input)) {
+                    isFormValid = false;
+                    input.focus(); // Focus on the first invalid input
+                    event.preventDefault(); // Prevent form submission
+                    return;
+                }
+            }
+
+            // Validate file input
+            let fileInput = document.getElementById("fileInput");
+            if (!fileInput.files.length) {
+                alert("Please upload a Show Statement file.");
+                event.preventDefault();
+                fileInput.focus();
+            }
+        });
+
+
+        // Clear error messages dynamically when user enters valid input
+        document.querySelectorAll(".totalShow, .cancelShow, .rate").forEach(input => {
+            input.addEventListener("input", function () {
+                let errorSpan = createFieldErrorSpan(input);
+                let numericValue = parseFloat(this.value.trim());
+
+                if (!isNaN(numericValue) && numericValue >= 0) {
+                    errorSpan.innerText = ""; // Clear error message
+                    this.classList.remove("is-invalid"); // Remove invalid class
+                }
+            });
+        });
+
+        //to month and from month
+        document.addEventListener("DOMContentLoaded", function () {
+            // Get the current date
+            let today = new Date();
+
+            // Format it to YYYY-MM (required for <input type="month">)
+            let currentMonth = today.toISOString().slice(0, 7);
+
+            // Set the default values for "From Month" and "To Month"
+            document.getElementById("fromDate").value = currentMonth;
+            document.getElementById("toDate").value = currentMonth;
+
+            // Call generateTable function automatically after setting default values
+        });
+
+        // Ensure generateTable is called when the button is clicked
+        document.getElementById("generateBtn").addEventListener("click", generateTable);
+
+        //reset button and readonly
+        document.addEventListener("DOMContentLoaded", function () {
+            let fromDateInput = document.getElementById("fromDate");
+            let toDateInput = document.getElementById("toDate");
+            let generateBtn = document.getElementById("generateBtn");
+            let resetBtn = document.getElementById("resetBtn");
+            let tableBody = document.getElementById("tableBody");
+
+            // Set default month values
+            function setDefaultMonths() {
+                let today = new Date();
+                let currentMonth = today.toISOString().slice(0, 7);
+                fromDateInput.value = currentMonth;
+                toDateInput.value = currentMonth;
+            }
+
+            // Ensure default months are set on page load
+            setDefaultMonths();
+
+            // Make the fields readonly after selection
+            generateBtn.addEventListener("click", function () {
+                if (fromDateInput.value && toDateInput.value) {
+                    fromDateInput.setAttribute("readonly", true);
+                    toDateInput.setAttribute("readonly", true);
+                    generateTable(); // Generate table
+                }
+            });
+
+            // Reset functionality - Refreshes the page
+            resetBtn.addEventListener("click", function () {
+                location.reload(); // Refresh the page
+            });
+        });
     </script>
 </body>
 </html>
