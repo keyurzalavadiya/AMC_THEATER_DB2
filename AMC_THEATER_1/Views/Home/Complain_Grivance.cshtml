@@ -21,7 +21,7 @@
             margin-left: 200px;
             max-width: 80%;
             padding: 15px;
-            margin-top: 50px;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -35,46 +35,46 @@
                 <div class="alert alert-success text-center">@TempData["SuccessMessage"]</div>
             }
 
-        <form asp-action="SubmitComplaint" asp-controller="Home" method="post" enctype="multipart/form-data">
-            <div class="row">
-                <div class="col-md-6 text-start">
-                    <label for="complaintType" class="form-label fw-bold">Select Complaint Type:</label>
-                    <select class="form-control" id="complaintType" name="complaintType" style="max-width:100%;" required>
-                        <option value="">-- Select Complaint Type --</option>
-                        <option value="Edit My Application">Edit My Application</option>
-                        <option value="Delete My Application">Delete My Application</option>
-                        <option value="Theater or Screen Under Maintenance">Theater or Screen Under Maintenance</option>
-                        <option value="Payment Issue">Payment Issue</option>
-                        <option value="Other">Other</option>
-                    </select>
+            <form asp-action="SubmitComplaint" asp-controller="Home" method="post" enctype="multipart/form-data">
+                <div class="row">
+                    <div class="col-md-6 text-start">
+                        <label for="complaintType" class="form-label fw-bold">Select Complaint Type:</label>
+                        <select class="form-control" id="complaintType" name="complaintType" style="max-width:100%;" required>
+                            <option value="">-- Select Complaint Type --</option>
+                            <option value="Edit My Application">Edit My Application</option>
+                            <option value="Delete My Application">Delete My Application</option>
+                            <option value="Theater or Screen Under Maintenance">Theater or Screen Under Maintenance</option>
+                            <option value="Payment Issue">Payment Issue</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 text-start">
+                        <label for="theaterID" class="form-label fw-bold">Select Your Theater ID:</label>
+                        <select class="form-control" id="theaterID" name="theaterID" style="max-width:100%;" required>
+                            <option value="">-- Select Your Theater ID --</option>
+                            <option value="T0001">T0001</option>
+                            <option value="T0002">T0002</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="col-md-6 text-start">
-                    <label for="theaterID" class="form-label fw-bold">Select Your Theater ID:</label>
-                    <select class="form-control" id="theaterID" name="theaterID" style="max-width:100%;" required>
-                        <option value="">-- Select Your Theater ID --</option>
-                        <option value="T0001">T0001</option>
-                        <option value="T0002">T0002</option>
-                    </select>
+
+
+
+                <div class="col-md-12 text-start mt-3">
+                    <label for="comments" class="form-label fw-bold">Enter Any Complaint / Grievance / Query :</label>
+                    <textarea class="form-control" id="comments" name="complaint" rows="7" placeholder="Enter your comments..." style="max-width:100%;" required></textarea>
                 </div>
-            </div>
 
+                <div class="col-md-12 text-start mt-3">
+                    <label for="document" class="form-label fw-bold">Upload Supporting Document :</label>
+                    <input type="file" id="document" name="documentFile" class="form-control" accept=".pdf,.doc,.docx,.jpg,.png" style="max-width:100%;" />
+                </div>
 
-
-            <div class="col-md-12 text-start mt-3">
-                <label for="comments" class="form-label fw-bold">Enter Any Complaint / Grievance / Query :</label>
-                <textarea class="form-control" id="comments" name="complaint" rows="7" placeholder="Enter your comments..." style="max-width:100%;" required></textarea>
-            </div>
-
-            <div class="col-md-12 text-start mt-3">
-                <label for="document" class="form-label fw-bold">Upload Supporting Document :</label>
-                <input type="file" id="document" name="documentFile" class="form-control" accept=".pdf,.doc,.docx,.jpg,.png" style="max-width:100%;" />
-            </div>
-
-            <div class="text-center mt-3">
-                <button type="submit" class="btn btn-success">Submit</button>
-                <button type="reset" class="btn btn-danger">Cancel</button>
-            </div>
-        </form>
+                <div class="text-center mt-3">
+                    <button type="submit" class="btn btn-success">Submit</button>
+                    <button type="reset" class="btn btn-danger">Cancel</button>
+                </div>
+            </form>
         </div>
     </div>
 </body>
