@@ -880,116 +880,112 @@ ViewBag.TotalAmount = latestAmt;
             }
         }
 
-
         [HttpPost]
         public ActionResult Theater_List(string theaterId, DateTime? fromDate, DateTime? toDate,
-                                   string statusFilter, string cityFilter,
-                                   string wardFilter, string zoneFilter,
-                                   string theaterTypeFilter, int? deleteId)
+                                       string statusFilter, string cityFilter,
+                                       string wardFilter, string zoneFilter,
+                                       string theaterTypeFilter, string deleteId)
         {
             Debug.WriteLine($"Received Data -> FromDate: {fromDate}, ToDate: {toDate}");
+
+            if (!string.IsNullOrEmpty(deleteId))
             {
-                if (deleteId.HasValue)
+                var theaterToDelete = db.TRN_REGISTRATION.FirstOrDefault(t => t.TId == deleteId);
+                if (theaterToDelete != null)
                 {
-                    var theaterToDelete = db.TRN_REGISTRATION.FirstOrDefault(t => t.ApplId == deleteId.Value);
-                    if (theaterToDelete != null)
-                    {
-                        theaterToDelete.TActive = 0;
-                        db.SaveChanges();
-                    }
+                    theaterToDelete.TActive = 0;
+                    db.SaveChanges();
                 }
-
-                var statuses = new List<string> { "Pending", "Approved", "Reject" };
-                var query = db.TRN_REGISTRATION.Where(tr => tr.TActive.HasValue && tr.TActive.Value == 1);
-
-                if (!string.IsNullOrEmpty(theaterId) && int.TryParse(theaterId, out int theaterIdInt))
-                {
-                    query = query.Where(tr => tr.ApplId == theaterIdInt);
-                    ViewBag.SelectedTheaterId = theaterId;
-                }
-
-                if (fromDate.HasValue)
-                {
-                    DateTime from = fromDate.Value.Date;
-                    query = query.Where(tr => tr.TCommencementDate.HasValue && tr.TCommencementDate.Value >= from);
-                }
-
-                if (toDate.HasValue)
-                {
-                    DateTime to = toDate.Value.Date.AddDays(1).AddTicks(-1);
-                    query = query.Where(tr => tr.TCommencementDate.HasValue && tr.TCommencementDate.Value <= to);
-                }
-
-                if (!string.IsNullOrEmpty(cityFilter))
-                {
-                    query = query.Where(tr => tr.TCity == cityFilter);
-                    ViewBag.SelectedCity = cityFilter;
-                }
-
-                if (!string.IsNullOrEmpty(wardFilter))
-                {
-                    query = query.Where(tr => tr.TWard == wardFilter);
-                    ViewBag.SelectedWard = wardFilter;
-                }
-
-                if (!string.IsNullOrEmpty(zoneFilter))
-                {
-                    query = query.Where(tr => tr.TZone == zoneFilter);
-                    ViewBag.SelectedZone = zoneFilter;
-                }
-
-                if (!string.IsNullOrEmpty(statusFilter) && statuses.Contains(statusFilter))
-                {
-                    query = query.Where(tr => tr.TStatus == statusFilter);
-                    ViewBag.SelectedStatus = statusFilter;
-                }
-
-                var result = query.Select(tr => new
-                {
-                    tr.TId,
-                    tr.ApplId,
-                    tr.TName,
-                    tr.TCity,
-                    tr.TAddress,
-                    tr.TTenamentNo,
-                    tr.TZone,
-                    tr.TWard,
-                    tr.TStatus,
-                    TheaterScreenCount = db.NO_OF_SCREENS.Count(s => s.ApplId == tr.ApplId && s.ScreenType == "Theater"),
-                    VideoTheaterScreenCount = db.NO_OF_SCREENS.Count(s => s.ApplId == tr.ApplId && s.ScreenType == "Video")
-                }).ToList();
-
-                ViewBag.FromDate = fromDate?.ToString("yyyy-MM-dd");
-                ViewBag.ToDate = toDate?.ToString("yyyy-MM-dd");
-
-                ViewBag.Cities = result.Select(tr => tr.TCity).Distinct().ToList();
-                ViewBag.Wards = result.Select(tr => tr.TWard).Distinct().ToList();
-                ViewBag.Zones = result.Select(tr => tr.TZone).Distinct().ToList();
-                ViewBag.Statuses = statuses;
-
-                ViewBag.TheaterTypes = db.MST_TT_TYPE.Select(t => t.ScreenType)
-                                                                .Distinct()
-                                                                .ToList();
-
-                var theaterList = result.Select(tr => new TheaterViewModel
-                {
-                    T_ID = tr.TId,
-                    ApplId = tr.ApplId,  // ✅ Pass REG_ID
-                    T_NAME = tr.TName,
-                    T_CITY = tr.TCity,
-                    T_ADDRESS = tr.TAddress,
-                    T_TENAMENT_NO = tr.TTenamentNo.ToString(),
-                    T_WARD = tr.TWard,
-                    T_ZONE = tr.TZone,
-                    T_STATUS = tr.TStatus,
-                    THEATER_SCREEN_COUNT = tr.TheaterScreenCount, // ✅ Theater Screens Count
-                    VIDEO_THEATER_SCREEN_COUNT = tr.VideoTheaterScreenCount, // ✅ Video Screens Count
-                    SCREEN_COUNT = tr.TheaterScreenCount + tr.VideoTheaterScreenCount  // ✅ Total Screens Count
-                }).ToList();
-
-                return View(theaterList);
             }
+
+            var statuses = new List<string> { "Pending", "Approved", "Reject" };
+            var query = db.TRN_REGISTRATION.Where(tr => tr.TActive.HasValue && tr.TActive.Value == 1);
+
+            if (!string.IsNullOrEmpty(theaterId))
+            {
+                query = query.Where(tr => tr.TId == theaterId);
+                ViewBag.SelectedTheaterId = theaterId;
+            }
+
+            if (fromDate.HasValue)
+            {
+                DateTime from = fromDate.Value.Date;
+                query = query.Where(tr => tr.TCommencementDate.HasValue && tr.TCommencementDate.Value >= from);
+            }
+
+            if (toDate.HasValue)
+            {
+                DateTime to = toDate.Value.Date.AddDays(1).AddTicks(-1);
+                query = query.Where(tr => tr.TCommencementDate.HasValue && tr.TCommencementDate.Value <= to);
+            }
+
+            if (!string.IsNullOrEmpty(cityFilter))
+            {
+                query = query.Where(tr => tr.TCity == cityFilter);
+                ViewBag.SelectedCity = cityFilter;
+            }
+
+            if (!string.IsNullOrEmpty(wardFilter))
+            {
+                query = query.Where(tr => tr.TWard == wardFilter);
+                ViewBag.SelectedWard = wardFilter;
+            }
+
+            if (!string.IsNullOrEmpty(zoneFilter))
+            {
+                query = query.Where(tr => tr.TZone == zoneFilter);
+                ViewBag.SelectedZone = zoneFilter;
+            }
+
+            if (!string.IsNullOrEmpty(statusFilter) && statuses.Contains(statusFilter))
+            {
+                query = query.Where(tr => tr.TStatus == statusFilter);
+                ViewBag.SelectedStatus = statusFilter;
+            }
+
+            var result = query.Select(tr => new
+            {
+                tr.ApplId,
+                tr.TId, // Now using TId instead of ApplId
+                tr.TName,
+                tr.TCity,
+                tr.TAddress,
+                tr.TTenamentNo,
+                tr.TZone,
+                tr.TWard,
+                tr.TCommencementDate,
+                tr.TStatus,
+                tr.UpdateDate,
+            }).ToList();
+
+            ViewBag.FromDate = fromDate?.ToString("yyyy-MM-dd");
+            ViewBag.ToDate = toDate?.ToString("yyyy-MM-dd");
+
+            ViewBag.Cities = result.Select(tr => tr.TCity).Distinct().ToList();
+            ViewBag.Wards = result.Select(tr => tr.TWard).Distinct().ToList();
+            ViewBag.Zones = result.Select(tr => tr.TZone).Distinct().ToList();
+            ViewBag.Statuses = statuses;
+
+            ViewBag.TheaterTypes = db.MST_TT_TYPE.Select(t => t.ScreenType).Distinct().ToList();
+
+            var theaterList = result.Select(tr => new TheaterViewModel
+            {
+                ApplId=tr.ApplId,                
+                T_ID = tr.TId, // Updated to use string TId
+                T_NAME = tr.TName,
+                T_CITY = tr.TCity,
+                T_ADDRESS = tr.TAddress,
+                T_TENAMENT_NO = tr.TTenamentNo?.ToString(),
+                T_WARD = tr.TWard,
+                T_ZONE = tr.TZone,
+                T_COMMENCEMENT_DATE = tr.TCommencementDate ?? DateTime.MinValue, // Handling null values safely
+                T_STATUS = tr.TStatus,
+                UPDATE_DATE = tr.UpdateDate ?? DateTime.MinValue,
+            }).ToList();
+
+            return View(theaterList);
         }
+
         public ActionResult Dues()
         {
             // Get current month and year

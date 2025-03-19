@@ -249,8 +249,8 @@
                             foreach (var theater in Model)
                             {
                                 <tr id="theater-@theater.T_ID">
+                                    <td class="sticky-column-left">@theater.ApplId</td>
                                     <td>@theater.T_ID</td>
-                                    <td>@theater.ApplId</td>
                                     @*<td class="sticky-column-left">@count</td>*@
                                     <td>@($"{theater.T_ZONE}  {theater.T_WARD}")</td>
                                     <td>@theater.T_NAME</td>
