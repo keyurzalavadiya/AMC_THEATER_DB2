@@ -502,8 +502,8 @@
             }
 
             // Special validation for "Total Show" (must be at least 1)
-            if (input.classList.contains("totalShow") && numericValue < 1) {
-                errorSpan.innerText = "Total Show must be at least 1!";
+            if (input.classList.contains("totalShow") && numericValue < 0) {
+                errorSpan.innerText = "Total Show must be at least 0!";
                 input.classList.add("is-invalid");
                 return false;
             }

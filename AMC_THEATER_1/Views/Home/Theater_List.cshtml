@@ -268,10 +268,24 @@
                                         @(theater.T_STATUS == "Pending" ? "-" : theater.UPDATE_DATE?.ToString("dd/MMM/yyyy"))
                                     </td>
                                     <td class="sticky-column-right">
-                                        <a href="@Url.Action("Edit", "Registration", new { id = theater.ApplId, mode="view"})"
-                                           class="btn btn-primary btn-sm" title="View">
-                                            <i class="fa fa-eye"></i>
-                                        </a>
+                                        <div class="btn-group" role="group">
+                                            <!-- View Button -->
+                                            <a href="@Url.Action("Edit", "Registration", new { id = theater.ApplId, mode="view"})"
+                                               class="btn btn-secondary btn-sm" title="View">
+                                                <i class="fa fa-eye"></i>
+                                            </a>
+
+                                            <!-- Edit Button -->
+                                            <a href="@Url.Action("Edit", "Registration", new { id = theater.ApplId, mode = "edit" })"
+                                                class="btn btn-primary btn-sm" title="Edit">
+                                                <i class="fa fa-edit"></i>
+                                            </a>
+                                            <!-- Delete Button -->
+                                            <button type="button" onclick="confirmSoftDelete('@theater.T_ID')"
+                                                class="btn btn-danger btn-sm" title="Delete">
+                                                <i class="fa fa-trash"></i>
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                                 count++;
