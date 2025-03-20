@@ -1453,7 +1453,14 @@ ViewBag.TotalAmount = latestAmt;
                     return View("AllReceipt", theaterDueList);
                 }
             }
-      
+        public ActionResult Notice()
+        {
+            return View();
+        }
+        public ActionResult Pending_Payment()
+        {
+            return View();
+        }
     }
     
     }
