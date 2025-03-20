@@ -1,0 +1,82 @@
+﻿@{
+    ViewBag.Title = "Notice";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notice</title>
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        html, body {
+            height: 100%;
+            background-color: #f8f8f8;
+        }
+
+        .notice-container {
+            margin-top:15%;
+            margin-left: 24%;
+            max-width: 600px;
+            padding: 20px;
+            border: 1px solid black;
+            background: white;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="d-flex justify-content-center align-items-center vh-100">
+
+    <div class="notice-container p-4">
+        <h2 class="text-center text-decoration-underline">Notice</h2>
+
+        <p class="mt-5">
+            To,<br>
+            <strong>Name of Theatre</strong><br>
+            <strong>Theatre ID</strong>
+        </p>
+
+        <p class="mt-5">
+            As per GPMC Act, 1949, Section 127(P), all the theatre and video theatres
+            within the city limit of Ahmedabad Municipal Corporation (AMC) are liable
+            to pay theatre tax (₹75 per show for theatre, ₹25 per show for video theatre).
+            AMC has facilitated all the registered theatre owners to pay theatre tax
+            through an online mode in the theatre tax module.
+        </p>
+
+        <p>
+            It has been found that your theatre tax is pending since ......(Month)..........(Year).
+            As a responsible citizen and owner of the theatre/video theatre,
+            it is your duty to pay theatre tax on time. Kindly pay the due theatre tax
+            to avoid penalty actions of AMC.
+        </p>
+
+        <p>
+            For any complaint/grievance, you can log in to the AMC website and register
+            your grievance in the theatre tax module.
+        </p>
+
+        <div class="footer text-end mt-5 ms-5 fw-bold">
+            Assessor and Tax Collector
+        </div>
+        <div class="me-3">
+            <p class="me-5 footer text-end ms-5 fw-bold">Theatre Tax</p>
+        </div>
+
+
+    </div>
+    <!-- Send Notice Button Aligned to End -->
+    <div class="text-center ms-4 mt-4 mb-4">
+        <button class="btn btn-danger">
+            <i class="fa fa-paper-plane"></i> Send Notice
+        </button>
+    </div>
+    <!-- Bootstrap 5 JS (Optional) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

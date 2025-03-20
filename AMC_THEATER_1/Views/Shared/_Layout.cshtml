@@ -103,9 +103,10 @@
         <div class="sidebar show" id="sidebar">
             <div class="mt-4">
                 <div class="mt-4">
+                    @*Profile Section with FA Icon*@
+
+
                     <a href="@Url.Action("Registration", "Registration")">New Registration</a>
-
-
 
                     <a href="@Url.Action("Theater_Tax", "Home")">Make Payment</a>
 
@@ -114,10 +115,19 @@
                     <a href="@Url.Action("Dues", "Home")">Tax Dues Details</a>
                     <a href="@Url.Action("AllReceipt", "Home")">Tax Paid Details</a>
                     @*<a href="@Url.Action("Tax_Hold", "Home")">Tax Hold Period</a>*@
-                    <a href="@Url.Action("AllReceipt", "Home")">Change in Profile</a>
+                    <a href="@Url.Action("Pending_payment", "Home")">Pending payment</a>
                     <a href="@Url.Action("Complain_Grivance", "Home")">Register Complaint/Grievance/Query</a>
+                    @{
+                        var phoneNumber = Session["PhoneNumber"] as string;
+                    }
 
-
+                    <a href="@Url.Action("Notice", "Home")" class="d-flex align-items-center mt-3">
+                        <i class="fas fa-user-circle fa-lg mr-2"></i>
+                        @if (!string.IsNullOrEmpty(phoneNumber))
+                        {
+                            <span class="ms-2">@phoneNumber</span>
+                        }
+                    </a>
 
 
                 </div>

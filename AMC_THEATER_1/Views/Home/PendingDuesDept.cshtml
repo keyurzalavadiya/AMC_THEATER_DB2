@@ -131,13 +131,13 @@
                     <tr>
                         <th class="fw-bold">Theater ID</th>
                         <th class="fw-bold">Theater Name</th>
-                        <th class="fw-bold">City</th>
                         <th class="fw-bold">Ward</th>
                         <th class="fw-bold">Zone</th>
                         <th class="fw-bold">Address</th>
                         <th class="fw-bold">Tenament Number</th>
                         <th class="fw-bold">Status</th>
                         <th class="fw-bold">Since Month</th> <!-- New Column -->
+                        <th class="fw-bold">Notice</th> <!-- New Column -->
                     </tr>
                 </thead>
                 <tbody>
@@ -148,7 +148,6 @@
                             <tr id="theater-@theater.T_ID">
                                 <td>@theater.T_ID</td>
                                 <td>@theater.T_NAME</td>
-                                <td>@theater.T_CITY</td>
                                 <td>@theater.T_WARD</td>
                                 <td>@theater.T_ZONE</td>
                                 <td>@theater.T_ADDRESS</td>
@@ -160,6 +159,11 @@
                                     }
                                 </td>
                                 <td>@theater.SINCE_MONTH</td> <!-- New Data Column -->
+                                <td>
+                                    <a href="@Url.Action("Notice", "Home", new { id = theater.T_ID })" class="btn btn-outline-danger">
+                                        <i class="fa fa-exclamation-triangle"></i> Send Notice
+                                    </a>
+                                </td>
                             </tr>
                         }
                     }
