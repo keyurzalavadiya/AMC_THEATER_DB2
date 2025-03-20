@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.Remoting.Messaging;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
@@ -1459,9 +1460,155 @@ ViewBag.TotalAmount = latestAmt;
         }
         public ActionResult Pending_Payment()
         {
-            return View();
+            int currentYear = DateTime.Now.Year;
+            int currentMonth = DateTime.Now.Month;
+            DateTime currentDate = new DateTime(currentYear, currentMonth, 1);
+
+
+            {
+                // ✅ Fetch all approved theaters
+                var theaters = db.TRN_REGISTRATION
+                    .Where(tr => tr.TStatus == "Approved")
+                    .Select(tr => new
+                    {
+                        tr.ApplId,
+                        tr.TId,
+                        tr.TName,
+                        tr.TCity,
+                        tr.TWard,
+                        tr.TZone,
+                        tr.TAddress,
+                        tr.TTenamentNo,
+                        tr.TStatus,
+                        CreateDate = tr.CreateDate ?? new DateTime(2000, 1, 1) // ✅ Default if null
+                    })
+                    .ToList();
+
+                // ✅ Fetch all payments at once (avoid multiple queries in loop)
+                var allPayments = db.THEATER_TAX_PAYMENT
+                    .Select(tp => new { tp.ApplId, tp.PaymentMonth, tp.PaymentYear })
+                    .ToList();
+
+                var theaterDueList = new List<TheaterViewModel>();
+
+                foreach (var theater in theaters)
+                {
+                    DateTime startDate = theater.CreateDate > currentDate ? currentDate : theater.CreateDate;
+
+                    for (DateTime date = startDate; date <= currentDate; date = date.AddMonths(1))
+                    {
+                        string monthName = date.ToString("MMMM", System.Globalization.CultureInfo.InvariantCulture);
+                        int year = date.Year;
+
+                        bool isPaid = allPayments.Any(tp => tp.ApplId == theater.ApplId
+                            && tp.PaymentMonth == monthName
+                            && tp.PaymentYear == year);
+
+                        if (!isPaid) continue; // ✅ Skip unpaid theaters
+
+                        theaterDueList.Add(new TheaterViewModel
+                        {
+                            ApplId = theater.ApplId,
+                            T_ID = theater.TId,
+                            T_NAME = theater.TName,
+                            T_CITY = theater.TCity,
+                            T_WARD = theater.TWard,
+                            T_ZONE = theater.TZone,
+                            T_ADDRESS = theater.TAddress,
+                            T_TENAMENT_NO = theater.TTenamentNo.ToString(),
+                            T_STATUS = theater.TStatus,
+                            SINCE_MONTH = date.ToString("MMMM yyyy"),
+                            PAYMENT_STATUS = "Paid",
+                            RCPT_NO = "Generated",
+                            RCPT_GEN_DATE = DateTime.Now,
+                            PAY_MODE = "Cash",
+                            STATUS = "Paid"
+                        });
+                    }
+                }
+
+                return View(theaterDueList); // ✅ Only Paid theaters are passed to the view
+            }
         }
-    }
+
+        [HttpPost]
+        public ActionResult Pending_Payment(int? theaterId, DateTime? fromDate, DateTime? toDate)
+        {
+           
+                {
+                    var theatersQuery = db.TRN_REGISTRATION
+                        .Where(tr => tr.TStatus == "Approved");
+
+                    if (theaterId.HasValue)
+                    {
+                        theatersQuery = theatersQuery.Where(tr => tr.ApplId == theaterId);
+                    }
+
+                    var theaters = theatersQuery
+                        .Select(tr => new
+                        {
+                            tr.ApplId,
+                            tr.TName,
+                            tr.TCity,
+                            tr.TWard,
+                            tr.TZone,
+                            tr.TAddress,
+                            tr.TTenamentNo,
+                            tr.TStatus,
+                            CreateDate = tr.CreateDate ?? new DateTime(2000, 1, 1) // ✅ Default if null
+                        })
+                        .ToList();
+
+        var allPayments = db.THEATER_TAX_PAYMENT
+            .Select(tp => new { tp.ApplId, tp.PaymentMonth, tp.PaymentYear })
+            .ToList();
+
+        var theaterDueList = new List<TheaterViewModel>();
+
+                    foreach (var theater in theaters)
+                    {
+                        DateTime startDate = theater.CreateDate;
+    DateTime endDate = DateTime.Now;
+
+                        if (fromDate.HasValue && toDate.HasValue)
+                        {
+                            startDate = fromDate.Value;
+                            endDate = toDate.Value;
+                        }
+
+for (DateTime date = startDate; date <= endDate; date = date.AddMonths(1))
+{
+    string monthName = date.ToString("MMMM", System.Globalization.CultureInfo.InvariantCulture);
+    int year = date.Year;
+
+    bool isPaid = allPayments.Any(tp => tp.ApplId == theater.ApplId
+        && tp.PaymentMonth == monthName
+        && tp.PaymentYear == year);
+
+    theaterDueList.Add(new TheaterViewModel
+    {
+        ApplId = theater.ApplId,
+        T_NAME = theater.TName,
+        T_CITY = theater.TCity,
+        T_WARD = theater.TWard,
+        T_ZONE = theater.TZone,
+        T_ADDRESS = theater.TAddress,
+        T_TENAMENT_NO = theater.TTenamentNo.ToString(),
+        T_STATUS = theater.TStatus,
+        SINCE_MONTH = date.ToString("MMMM yyyy"),
+        PAYMENT_STATUS = isPaid ? "Paid" : "Unpaid",
+        RCPT_NO = isPaid ? "Generated" : "N/A",
+        RCPT_GEN_DATE = isPaid ? DateTime.Now : (DateTime?)null,
+        PAY_MODE = isPaid ? "Cash" : "N/A",
+        STATUS = isPaid ? "Paid" : "Pending"
+    });
+}
+                    }
+
+                    return View("AllReceipt", theaterDueList);
+                }
+            }
+        }
     
     }
 
