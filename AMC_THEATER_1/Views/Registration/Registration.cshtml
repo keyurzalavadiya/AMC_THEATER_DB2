@@ -54,9 +54,6 @@
                 display: none !important; /* Hide sidebar, navbar, and buttons */
             }
             /* Ensure "Update" button is hidden only in print mode */
-            
-
-       
         }
     </style>
 
@@ -307,7 +304,9 @@
                             <tr>
                                 <td>
                                     <input type="hidden" name="NO_OF_SCREENS[0].ApplId" value="@Model.ApplId">
-                                    <input type="text" name="NO_OF_SCREENS[0].ScreenNo" class="form-control ms-4" placeholder="Enter Screen No">
+                                    <input type="text" name="NO_OF_SCREENS[0].ScreenNo" class="form-control ms-4"
+                                           placeholder="Enter Screen No" oninput="validateScreenNumber(this)">
+
                                 </td>
 
                                 <td>
@@ -440,7 +439,7 @@
 
                         <button type="button" class="btn btn-secondary" onclick="window.history.back()">Back</button>
                     }
-                
+
                     else if (ViewBag.Mode == "approve")
                     {
                         ViewBag.ShowBasicNavbar = false;
@@ -512,86 +511,16 @@
             }
 </body>
 </html>
-</html>
+
 
 
 @*SCRIPT*@
-@*Year Script*@
-
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        let currentYear = new Date().getFullYear();
-        let dropdown = document.getElementById("offlineDueYear");
-        let storedYear = "@(Model?.OfflineTaxPaidYear?.Year ?? DateTime.Now.Year)"; // Default to current year if null
-        storedYear = parseInt(storedYear, 10); // Ensure it's an integer
-
-        if (dropdown) {
-            for (let i = currentYear; i >= currentYear - 50; i--) {
-                let option = document.createElement("option");
-                option.value = i;
-                option.textContent = i;
-                if (i === storedYear) {
-                    option.selected = true;
-                }
-                dropdown.appendChild(option);
-            }
-
-            function updateDueDate() {
-                let selectedYear = dropdown.value;
-                document.getElementById("offlineDueDate").value = selectedYear ? `${selectedYear}-01-01` : "";
-            }
-
-            dropdown.addEventListener("change", updateDueDate);
-            updateDueDate(); // Initialize hidden field on page load
-        }
-    });
-</script>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        let storedDate = "@(Model?.OfflineTaxPaidMonth?.ToString("yyyy-MM-dd") ?? "")";
-        let selectedMonth = storedDate ? storedDate.split("-")[1] : "";
-        let selectedYear = storedDate ? storedDate.split("-")[0] : new Date().getFullYear();
-
-        let monthDropdown = document.getElementById("offlineTaxPaidMonth");
-        let hiddenDateField = document.getElementById("offlineTaxPaidDate");
-
-        if (monthDropdown) {
-            if (selectedMonth) {
-                monthDropdown.value = selectedMonth;
-            }
-
-            function updateHiddenField() {
-                let selectedMonth = monthDropdown.value;
-                if (selectedMonth) {
-                    hiddenDateField.value = `${selectedYear}-${selectedMonth}-01`;
-                }
-            }
-
-            monthDropdown.addEventListener("change", updateHiddenField);
-            updateHiddenField(); // Initialize hidden field on page load
-        }
-    });
-</script>
-
-
-@functions {
-    public string GetFileSize(string filePath)
-    {
-        string fullPath = HttpContext.Current.Server.MapPath("~/UploadedFiles/" + Path.GetFileName(filePath));
-        if (System.IO.File.Exists(fullPath))
-        {
-            long fileSize = new System.IO.FileInfo(fullPath).Length;
-            return (fileSize / (1024.0 * 1024.0)).ToString("0.##");
-        }
-        return "0";
-    }
-}
+@*VALIDATION AND ADD SCREEN*@
 <!-- Hidden input to store screen data -->
 <script>
     function addScreen() {
         debugger;
-        const tableBody = document.querySelector("#screenTableBody"); // Ensure tbody selection
+        const tableBody = document.querySelector("#screenTableBody");
         if (!tableBody) {
             console.error("Table body not found!");
             return;
@@ -603,6 +532,13 @@
 
         if (rows.length >= 10) {
             alert("Maximum 10 screens can be added.");
+            return;
+        }
+
+        // Prevent adding a row if any existing input has an error message
+        const errorMessages = document.querySelectorAll(".error-message");
+        if (errorMessages.length > 0) {
+            alert("Solve The Current Error Then Add Screen");
             return;
         }
 
@@ -621,7 +557,7 @@
                     }
                 });
 
-                return;
+                return; // Stop execution if any field is empty
             }
         }
 
@@ -704,14 +640,20 @@
 
     function validateScreenNumber(input) {
         const enteredNumber = input.value.trim();
-        const existingScreenNumbers = [...document.querySelectorAll('input[name*=".SCREEN_NO"]')]
+        if (enteredNumber === "") return; // Skip validation if empty
+
+        // Select all inputs matching the screen number pattern
+        const screenNumberInputs = document.querySelectorAll('input[name^="NO_OF_SCREENS"][name$=".ScreenNo"]');
+
+        const existingScreenNumbers = [...screenNumberInputs]
             .map(inp => inp.value.trim())
             .filter(value => value !== "");
 
+        // Check for duplicate entries
         if (existingScreenNumbers.filter(num => num === enteredNumber).length > 1) {
             showErrorMessage(input, "Duplicate screen number is not allowed.");
-        } else if (enteredNumber !== "") {
-            clearErrorMessage(input); // ✅ Remove error when a valid number is entered
+        } else {
+            clearErrorMessage(input); // ✅ Remove error when corrected
         }
     }
 
@@ -737,6 +679,78 @@
 
 </script>
 
+
+@*Year Script*@
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let currentYear = new Date().getFullYear();
+        let dropdown = document.getElementById("offlineDueYear");
+        let storedYear = "@(Model?.OfflineTaxPaidYear?.Year ?? DateTime.Now.Year)"; // Default to current year if null
+        storedYear = parseInt(storedYear, 10); // Ensure it's an integer
+
+        if (dropdown) {
+            for (let i = currentYear; i >= currentYear - 50; i--) {
+                let option = document.createElement("option");
+                option.value = i;
+                option.textContent = i;
+                if (i === storedYear) {
+                    option.selected = true;
+                }
+                dropdown.appendChild(option);
+            }
+
+            function updateDueDate() {
+                let selectedYear = dropdown.value;
+                document.getElementById("offlineDueDate").value = selectedYear ? `${selectedYear}-01-01` : "";
+            }
+
+            dropdown.addEventListener("change", updateDueDate);
+            updateDueDate(); // Initialize hidden field on page load
+        }
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let storedDate = "@(Model?.OfflineTaxPaidMonth?.ToString("yyyy-MM-dd") ?? "")";
+        let selectedMonth = storedDate ? storedDate.split("-")[1] : "";
+        let selectedYear = storedDate ? storedDate.split("-")[0] : new Date().getFullYear();
+
+        let monthDropdown = document.getElementById("offlineTaxPaidMonth");
+        let hiddenDateField = document.getElementById("offlineTaxPaidDate");
+
+        if (monthDropdown) {
+            if (selectedMonth) {
+                monthDropdown.value = selectedMonth;
+            }
+
+            function updateHiddenField() {
+                let selectedMonth = monthDropdown.value;
+                if (selectedMonth) {
+                    hiddenDateField.value = `${selectedYear}-${selectedMonth}-01`;
+                }
+            }
+
+            monthDropdown.addEventListener("change", updateHiddenField);
+            updateHiddenField(); // Initialize hidden field on page load
+        }
+    });
+</script>
+
+
+@functions {
+    public string GetFileSize(string filePath)
+    {
+        string fullPath = HttpContext.Current.Server.MapPath("~/UploadedFiles/" + Path.GetFileName(filePath));
+        if (System.IO.File.Exists(fullPath))
+        {
+            long fileSize = new System.IO.FileInfo(fullPath).Length;
+            return (fileSize / (1024.0 * 1024.0)).ToString("0.##");
+        }
+        return "0";
+    }
+}
 
 @*offlineTax*@
 
