@@ -1,6 +1,6 @@
 ﻿@{
     ViewBag.Title = "Complain_Grivance";
-    ViewBag.ShowBasicNavbar = false; // Show only the basic navbar
+    ViewBag.ShowBasicNavbar = false;
     ViewBag.ShowHomeIcon = true;
     ViewBag.Module = true;
     ViewBag.ShowNavbar = true;
@@ -29,20 +29,28 @@
     <div class="container d-flex justify-content-center align-items-center">
         <div class="card shadow-lg p-4 w-100">
             <h3 class="text-center mb-4 bg-light p-3">Complaint / Grievance and Query</h3>
-            <form action="@Url.Action("SubmitComplaint", "Home")" method="post" enctype="multipart/form-data">
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success text-center">@TempData["SuccessMessage"]</div>
+            }
+
+            <form asp-action="SubmitComplaint" asp-controller="Home" method="post" enctype="multipart/form-data">
                 <div class="col-md-12 text-start">
                     <label for="comments" class="form-label fw-bold">Enter Any Complaint / Grievance / Query :</label>
-                    <textarea class="form-control" id="comments" name="complaint" rows="7" placeholder="Enter your comments..." style="max-width:100%;" required></textarea>
+                    <textarea class="form-control" id="comments" name="complaint" rows="7" placeholder="Enter your comments..." required></textarea>
                 </div>
+
                 <div class="col-md-12 text-start mt-3">
                     <label for="document" class="form-label fw-bold">Upload Supporting Document :</label>
-                    <input type="file" id="document" name="documentFile" class="form-control" accept=".pdf,.doc,.docx,.jpg,.png" style="max-width:100%;" />
+                    <input type="file" id="document" name="documentFile" class="form-control" accept=".pdf,.doc,.docx,.jpg,.png" />
                 </div>
+
                 <div class="text-center mt-3">
                     <button type="submit" class="btn btn-success">Submit</button>
                     <button type="reset" class="btn btn-danger">Cancel</button>
                 </div>
-            </form>
+            </form>ion
         </div>
     </div>
 </body>
