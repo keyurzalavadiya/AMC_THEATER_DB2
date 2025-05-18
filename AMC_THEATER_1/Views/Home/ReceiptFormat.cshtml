@@ -1,0 +1,183 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Receipt - Amdavad Municipal Corporation</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        .receipt-container {
+            max-width: 800px;
+            background: #fff;
+            padding: 20px;
+            border: 1px solid #000;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body class="bg-light py-4">
+
+    <div class="container d-flex justify-content-center">
+        <div class="receipt-container bg-white p-3 border border-dark shadow w-100" id="receipt">
+
+            <!-- Logo -->
+            <div class="text-center mb-2">
+                <!-- Use Base64 encoded image here -->
+                <img src="~/Img/amc-logo.png"
+                     alt="Amdavad Municipal Corporation" width="100" id="receipt-logo">
+            </div>
+
+            <!-- Header -->
+            <h5 class="text-center text-uppercase fw-bold border-bottom pb-1 mb-2">Amdavad Municipal Corporation</h5>
+
+            <!-- First Row: Tax No & Receipt Details -->
+            <div class="row text-sm">
+                <div class="col-6">
+                    <p><span class="fw-bold">Theater Tax ID No:</span> T0010</p>
+                    <p><span class="fw-bold">Old Theater Tax ID:</span></p>
+                </div>
+                <div class="col-6 text-start">
+                    <p><span class="fw-bold">Receipt Number:</span> 2024250013251867</p>
+                    <p><span class="fw-bold">Receipt Date:</span> 18-Feb-2025</p>
+                    <p><span class="fw-bold">Receipt Year:</span> 2024-25</p>
+                </div>
+            </div>
+
+            <hr class="border-2 border-dark">
+
+            <!-- Second Row: Zone & Ward -->
+            <div class="d-flex justify-content-between text-sm">
+                <p><span class="fw-bold">Zone:</span> SOUTH</p>
+                <p><span class="fw-bold">Ward:</span> GORDHANVADI</p>
+            </div>
+
+            <!-- Received From & Other Details -->
+            <p class="text-sm"><span class="fw-bold">Received From:</span> ASHISH NARENDRAPRASAD BHATT</p>
+            <p class="text-sm"><span class="fw-bold">Est. Name / Type:</span> VISHESH PACKAGING INDUSTRIES PRIVATE LIMITED</p>
+            <p class="text-sm"><span class="fw-bold">Employer Class:</span> DIRECTOR</p>
+            <p class="text-sm"><span class="fw-bold">Years:</span> 2024-25-February, 2024-25-January</p>
+
+            <hr class="border-2 border-dark">
+
+            <!-- Table -->
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered text-center">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">No</th>
+                            <th scope="col">Month</th>
+                            <th scope="col">Year</th>
+                            <th scope="col">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">1</th>
+                            <td>January</td>
+                            <td>2024</td>
+                            <td class="text-end">₹1,500</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>February</td>
+                            <td>2024</td>
+                            <td class="text-end">₹2,900</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">3</th>
+                            <td>March</td>
+                            <td>2024</td>
+                            <td class="text-end">₹1,200</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">4</th>
+                            <td>April</td>
+                            <td>2024</td>
+                            <td class="text-end">₹3,500</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" class="text-end fw-bold">TOTAL</td>
+                            <td class="fw-bold text-end">₹9,100</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <hr class="border-2 border-dark">
+
+            <!-- Payment & Office Name -->
+            <div class="row mt-2">
+                <div class="col-6">
+                    <p class="fw-bold">Payment Mode: <span class="fw-normal">Online</span></p>
+                    <p class="fw-bold">Office Name: <span class="fw-normal">Sardar Patel Bhavan, Danapith</span></p>
+                </div>
+            </div>
+
+            <!-- Note -->
+            <p class="text-muted small mt-2">
+                <strong>Note:</strong> This is a computer-generated receipt, hence signature is not necessary.
+                Subject to actual payment received by the Amdavad Municipal Corporation.
+            </p>
+
+            <!-- Footer -->
+            <div class="text-center mt-2 border-top pt-1 small">
+                <p class="mb-0">Thank you for your payment.</p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Print & Download Buttons -->
+    <div class="container d-flex justify-content-center mt-3 no-print">
+        <button class="btn btn-primary me-2" onclick="printReceipt()">Print Receipt</button>
+        <button class="btn btn-success" onclick="downloadReceipt()">Download PDF</button>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function printReceipt() {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const receipt = document.getElementById('receipt');
+
+            html2canvas(receipt, { scale: 2 }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const imgWidth = 190; // mm
+                const pageHeight = 297; // A4 page height in mm
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                let position = 10; // Margin from top
+
+                pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+                pdf.autoPrint();
+                window.open(pdf.output('bloburl'), '_blank');
+            });
+        }
+
+        function downloadReceipt() {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const receipt = document.getElementById('receipt');
+
+            html2canvas(receipt, { scale: 2 }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const imgWidth = 190; // mm
+                const pageHeight = 297; // A4 page height in mm
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                let position = 10; // Margin from top
+
+                pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+                pdf.save('Receipt_AMC.pdf');
+            });
+        }
+    </script>
+</body>
+</html>

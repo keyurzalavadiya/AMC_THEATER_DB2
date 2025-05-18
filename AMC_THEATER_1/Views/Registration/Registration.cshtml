@@ -188,8 +188,10 @@
                 <!-- City, Zone, Ward -->
                 <div class="row ms-4 align-items-end">
                     <div class="col-md-4">
-                        <label for="TTenamentNo" class="form-label fw-bold">AMC Property Tax Tenement No <span class="text-danger">*</span></label>
-                        @Html.TextBox("TTenamentNo", Model?.TTenamentNo, new { @class = "form-control readonly-field", placeholder = "Enter theater name", required = "required" })
+                        <label for="TTenamentNo" class="form-label fw-bold">
+                            AMC Property Tax Tenement No <span class="text-danger">*</span>
+                        </label>
+                        @Html.TextBoxFor(model => model.TTenamentNo, new { @class = "form-control readonly-field", placeholder = "Enter Tenement No", required = "required" })
                     </div>
 
                     <div class="col-md-4">

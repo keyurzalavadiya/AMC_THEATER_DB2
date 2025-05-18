@@ -140,12 +140,16 @@ namespace AMC_THEATER_1.Controllers
                                 model.OfflineTaxPaidMonth = new DateTime(model.OfflineTaxPaidYear?.Year ?? DateTime.Now.Year, month, 1); // Store as DateTime
                                 Debug.WriteLine($"Parsed OfflineTaxPaidMonth: {model.OfflineTaxPaidMonth}");
                             }
-                           
+                    // ✅ Ensure TTenamentNo is stored correctly
+                    if (!string.IsNullOrEmpty(model.TTenamentNo))
+                    {
+                        model.TTenamentNo = string.Join(",", model.TTenamentNo.Split(',').Select(t => t.Trim()));
+                    }
 
-                            db.TRN_REGISTRATION.Add(model);
-                            db.SaveChanges();
-                            db.Database.ExecuteSqlCommand("CALL AMCTHEATER.ADD_THEATER(@p0)", model.ApplId);
-                        }
+                    db.TRN_REGISTRATION.Add(model);
+                    db.SaveChanges();
+                    db.Database.ExecuteSqlCommand("CALL AMCTHEATER.ADD_THEATER(@p0)", model.ApplId);
+                }
                 else
                 {
                     var existingEntity = db.TRN_REGISTRATION.Find(model.ApplId);

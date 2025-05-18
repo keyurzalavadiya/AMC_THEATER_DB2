@@ -229,6 +229,8 @@
     <Content Include="Views\Registration\Registration.cshtml" />
     <Content Include="Views\Home\SearchID.cshtml" />
     <Content Include="Views\Home\Print_Application.cshtml" />
+    <Content Include="Views\Home\ReceiptFormat.cshtml" />
+    <Content Include="Views\Home\Complain_Grivance.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

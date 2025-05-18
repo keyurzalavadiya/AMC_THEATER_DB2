@@ -117,7 +117,7 @@
                                         <td>
                                             @if (theater.PAYMENT_STATUS == "Paid")
                                             {
-                                                <a href="@Url.Action("Receipt", "Home", new { theaterId = theater.T_ID })"
+                                                <a href="@Url.Action("ReceiptFormat", "Home", new { theaterId = theater.T_ID })"
                                                    class="btn btn-secondary btn-sm" data-bs-toggle="tooltip" title="View Receipt">
                                                     <i class="bi bi-receipt"></i> Receipt
                                                 </a>

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 
 namespace AMC_THEATER_1.Models
 {
@@ -63,6 +64,16 @@ namespace AMC_THEATER_1.Models
         [Required]
         [Column("T_TENAMENT_NO")]
         public string TTenamentNo { get; set; }
+        // Convert to List for easy handling
+        public List<string> GetTenementNumbers()
+        {
+            return TTenamentNo?.Split(',').Select(t => t.Trim()).ToList() ?? new List<string>();
+        }
+
+        public void SetTenementNumbers(List<string> numbers)
+        {
+            TTenamentNo = string.Join(",", numbers);
+        }
 
         [Required]
         [Column("T_ZONE")]

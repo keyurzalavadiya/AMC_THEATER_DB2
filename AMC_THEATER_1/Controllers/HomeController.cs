@@ -22,8 +22,14 @@ namespace Amc_theater.Controllers
     {
         readonly ApplicationDbContext db = new ApplicationDbContext();
 
-      
-
+        public ActionResult ReceiptFormat()
+        {
+            return View();
+        }
+        public ActionResult Complain_Grivance()
+        {
+            return View();
+        }
         public ActionResult Print_Application(int? id, string mode = "print")
         {
             if (id == null)

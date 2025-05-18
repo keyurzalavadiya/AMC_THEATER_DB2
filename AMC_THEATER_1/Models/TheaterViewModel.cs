@@ -113,7 +113,7 @@ namespace AMC_THEATER_1.Models
 
         [NotMapped]
         public string STATUS { get; set; } = "Paid";
-        internal List<DocumentViewModel> Documents { get; set; }
+        //internal List<DocumentViewModel> Documents { get; set; }
 
         // ===== METHODS =====
         public string GetScreenType()
