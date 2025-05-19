@@ -20,7 +20,7 @@ public class NO_OF_SCREENS
 
 
 
-    [ForeignKey("TRN_REGISTRATION")]
+    //[ForeignKey("TRN_REGISTRATION")]
     [Column("APPL_ID")]
     public int ApplId { get; set; }  // ✅ Foreign Key referencing TRN_REGISTRATION (Not nullable)
 

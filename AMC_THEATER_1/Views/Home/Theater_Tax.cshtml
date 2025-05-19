@@ -125,12 +125,16 @@
                                         <div class="row align-items-end">
                                             <div class="col-md-4">
                                                 <label for="fromDate" class="form-label fw-bold">From Month</label>
-                                                <input type="month" id="fromDate" name="FromMonth" class="form-control">
+                                                <input type="month" id="fromDate" name="FromMonth" class="form-control"
+                                                       value="@Request.Form["FromMonth"]">
                                             </div>
+
                                             <div class="col-md-4">
                                                 <label for="toDate" class="form-label ms-3 fw-bold">To Month</label>
-                                                <input type="month" id="toDate" name="ToMonth" class="form-control ms-2">
+                                                <input type="month" id="toDate" name="ToMonth" class="form-control ms-2"
+                                                       value="@Request.Form["ToMonth"]">
                                             </div>
+
                                             <div class="col-md-4">
                                                 <button type="button" class="btn btn-primary ms-5 w-50" id="generateBtn">Generate Table</button>
                                                 <button id="resetBtn" class="btn btn-secondary w-25">Reset</button>
@@ -242,7 +246,7 @@
                             </div>
 
                             <div class="col-12 text-center">
-                                <button type="submit" class="btn btn-success m-3 w-25">Submit Payment</button>
+                                <button type="submit" class="btn btn-success m-3 w-25">Proceed For Payment</button>
                             </div>
                         </div>
                     }
@@ -498,7 +502,7 @@
             }
 
             // Special validation for "Total Show" (must be at least 1)
-            if (input.classList.contains("totalShow") && numericValue < 0) {
+            if (input.classList.contains("totalShow") && numericValue < 1) {
                 errorSpan.innerText = "Total Show must be at least 1!";
                 input.classList.add("is-invalid");
                 return false;

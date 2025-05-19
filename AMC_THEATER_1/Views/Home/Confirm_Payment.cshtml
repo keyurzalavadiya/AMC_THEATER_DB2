@@ -1,0 +1,103 @@
+﻿@model AMC_THEATER_1.Models.TheaterViewModel
+
+
+@{
+    ViewBag.Title = "Confirm_Payment";
+    ViewBag.ShowBasicNavbar = false; // Show only the basic navbar
+    ViewBag.ShowHomeIcon = true;
+    ViewBag.Module = true;
+
+    ViewBag.ShowNavbar = true;
+    ViewBag.ShowSideBar = true;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Confirmation</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container {
+            margin-left: 115px; /* Set this to match the sidebar width */
+            transition: margin-left 0.3s;
+            padding: 15px;
+        }
+
+        .text-muted {
+            color: gray !important;
+        }
+        .table td, .table th {
+            vertical-align: middle; /* Aligns text in the middle */
+            text-align: left; /* Ensures text remains left-aligned */
+        }
+
+            .table td:first-child {
+                border-right: 1px solid dark; /* Creates a center vertical line */
+                width: 50%; /* Ensures equal column width */
+            }
+
+    </style>
+
+</head>
+
+<body>
+    <div class="container mt-5">
+        <div class="card">
+            <div class="card-header text-white bg-primary text-center ">
+                PAYMENT CONFIRMATION
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered">
+                    <tr>
+                        <td><label>Theater ID</label></td>
+                        <td class="text-end">@Model.T_ID</td>
+                    </tr>
+                    <tr>
+                        <td>Payment Ref.No</td>
+                        <td class="text-end">13345293</td>
+                    </tr>
+                    <tr>
+                        <td>Name</td>
+                        <td class="text-end">@Model.T_NAME</td>
+                    </tr>
+                    <tr>
+                        <td>Service Name</td>
+                        <td class="text-end">Theater Tax</td>
+                    </tr>
+                    <tr>
+                        <td>Charges (Rs.)</td>
+                        <td class="text-end">@ViewBag.TotalAmount</td>
+                    </tr>
+                    <tr>
+                        <td>Email ID</td>
+                        <td><input type="email" class="form-control" name="user_email" style="max-width:100%;"></td>
+                    </tr>
+                    <tr>
+                        <td>Mobile</td>
+                        <td><input type="text" class="form-control" name="phn_number" style="max-width:100%;"></td>
+                    </tr>
+                </table>
+                <div class="text-center my-3">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="gateway" id="gateway1" checked>
+                        <label class="form-check-label" for="gateway1">Payment Gateway 1</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="gateway" id="gateway2">
+                        <label class="form-check-label" for="gateway2">Payment Gateway 2</label>
+                    </div>
+                </div>
+                <div class="text-danger text-center" role="alert">
+                    This is only Payment Gateway. All the banks are available after Confirm Payment.
+                </div>
+                <div class="text-center mt-4">
+                    <button class="btn btn-primary">Confirm Payment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -12,7 +12,7 @@ namespace AMC_THEATER_1.Models
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column("\"APPL_ID\"")]
+        [Column("APPL_ID")]
         public int ApplId { get; set; }
 
         [Column("T_ID")]

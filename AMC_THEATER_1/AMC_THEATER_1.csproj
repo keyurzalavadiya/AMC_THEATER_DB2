@@ -231,6 +231,7 @@
     <Content Include="Views\Home\Print_Application.cshtml" />
     <Content Include="Views\Home\ReceiptFormat.cshtml" />
     <Content Include="Views\Home\Complain_Grivance.cshtml" />
+    <Content Include="Views\Home\Confirm_Payment.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

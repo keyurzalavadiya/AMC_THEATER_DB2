@@ -30,6 +30,41 @@ namespace Amc_theater.Controllers
         {
             return View();
         }
+
+        public ActionResult Confirm_Payment(string id)
+        {
+            //if (id == null)
+            //{
+            //    TempData["Error"] = "Invalid Theater ID.";
+            //    return RedirectToAction("Index");
+            //}
+
+            var registration = db.TRN_REGISTRATION.FirstOrDefault(r => r.TId == id);
+
+            if (registration != null)
+            {
+               var latestAmt = db.THEATER_TAX_PAYMENT
+                 .Where(t => t.TId == registration.TId)
+                 .OrderByDescending(t => t.CreateDate) // Ensure the latest record is selected
+                 .Select(t => t.TaxAmount)
+                 .FirstOrDefault(); // Fetch the latest amount
+
+ViewBag.TotalAmount = latestAmt;
+
+
+                var viewModel = new TheaterViewModel
+                {
+                    T_ID = registration.TId,
+                    T_NAME = registration.TName
+                };
+
+                return View(viewModel);
+            }
+
+            ViewBag.TotalAmount = 0;
+            return View(new TheaterViewModel()); // Return an empty ViewModel if no data is found
+        }
+
         public ActionResult Print_Application(int? id, string mode = "print")
         {
             if (id == null)
@@ -98,7 +133,6 @@ namespace Amc_theater.Controllers
             return View("Print_Application", viewModel);
         }
 
-
         public ActionResult List_of_Application()
         {
             ViewBag.CurrentAction = "List of Application"; // ✅ Important for UI
@@ -115,7 +149,7 @@ namespace Amc_theater.Controllers
                     return RedirectToAction("Login", "Home");
                 }
 
-                // Fetch only records matching the phone number stored in session
+                // Fetch data from TRN_REGISTRATION and calculate screen counts from NO_OF_SCREENS
                 var query = from tr in db.TRN_REGISTRATION
                             where tr.TActive == 1 && tr.ManagerContactNo.ToString() == sessionPhoneNumber
                             select new
@@ -132,9 +166,20 @@ namespace Amc_theater.Controllers
                                 tr.RejectReason,
                                 tr.UpdateDate,
                                 tr.TCommencementDate,
+
+                                //// Count Theater Screens
+                                //TheaterScreenCount = (from s in db.NO_OF_SCREENS
+                                //                      where s.ApplId == tr.ApplId && s.ScreenType == "Theater"
+                                //                      select s.ScreenId).Count(),
+
+                                //// Count Video Screens
+                                //VideoScreenCount = (from s in db.NO_OF_SCREENS
+                                //                    where s.ApplId == tr.ApplId && s.ScreenType == "Video"
+                                //                    select s.ScreenId).Count()
                             };
 
                 var result = query.ToList();
+
                 theaterList = result.Select(tr => new TheaterViewModel
                 {
                     T_ID = tr.TId,
@@ -149,7 +194,14 @@ namespace Amc_theater.Controllers
                     REJECT_REASON = tr.RejectReason,
                     T_COMMENCEMENT_DATE = tr.TCommencementDate ?? DateTime.MinValue,
                     UPDATE_DATE = tr.UpdateDate ?? DateTime.MinValue,
+
+                    //// Set the screen count values
+                    //SCREEN_COUNT = tr.TheaterScreenCount + tr.VideoScreenCount,
+                    //THEATER_SCREEN_COUNT = tr.TheaterScreenCount,
+                    //VIDEO_THEATER_SCREEN_COUNT = tr.VideoScreenCount
                 }).ToList();
+
+          
             }
             catch (Exception ex)
             {
@@ -366,11 +418,11 @@ namespace Amc_theater.Controllers
                         }
 
                         db.SaveChanges();
-                        //transaction.Commit();
-                        TempData["Success"] = "Tax payment saved successfully!";
-                        return RedirectToAction("Theater_Tax");
-                    }
-          }
+                return RedirectToAction("Confirm_Payment", "Home", new { id = model.TId });
+                TempData["Success"] = "Tax payment saved successfully!";
+                
+            }
+        }
 
         public ActionResult Seprate_Theater_Tax()
         {
@@ -1221,7 +1273,9 @@ namespace Amc_theater.Controllers
                     return View("AllReceipt", theaterDueList);
                 }
             }
-        }
+      
+    }
+    
     }
 
 
