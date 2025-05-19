@@ -42,8 +42,8 @@ namespace AMC_THEATER_1.Models
         [Column("T_OWNER_NAME")]
         public string T_OWNER_NAME { get; set; }
 
-        [Column("ManagerContactNo")]
-        public int T_OWNER_NUMBER { get; set; }
+        [Column("MANAGER_CON_NO")]
+        public string T_OWNER_NUMBER { get; set; }
 
         [Column("T_OWNER_EMAIL")]
         public string T_OWNER_EMAIL { get; set; }

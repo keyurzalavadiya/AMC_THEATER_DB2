@@ -38,19 +38,19 @@
             <form asp-action="SubmitComplaint" asp-controller="Home" method="post" enctype="multipart/form-data">
                 <div class="col-md-12 text-start">
                     <label for="comments" class="form-label fw-bold">Enter Any Complaint / Grievance / Query :</label>
-                    <textarea class="form-control" id="comments" name="complaint" rows="7" placeholder="Enter your comments..." required></textarea>
+                    <textarea class="form-control" id="comments" name="complaint" rows="7" placeholder="Enter your comments..." style="max-width:100%;"required></textarea>
                 </div>
 
                 <div class="col-md-12 text-start mt-3">
                     <label for="document" class="form-label fw-bold">Upload Supporting Document :</label>
-                    <input type="file" id="document" name="documentFile" class="form-control" accept=".pdf,.doc,.docx,.jpg,.png" />
+                    <input type="file" id="document" name="documentFile" class="form-control" accept=".pdf,.doc,.docx,.jpg,.png" style="max-width:100%;"/>
                 </div>
 
                 <div class="text-center mt-3">
                     <button type="submit" class="btn btn-success">Submit</button>
                     <button type="reset" class="btn btn-danger">Cancel</button>
                 </div>
-            </form>ion
+            </form>
         </div>
     </div>
 </body>

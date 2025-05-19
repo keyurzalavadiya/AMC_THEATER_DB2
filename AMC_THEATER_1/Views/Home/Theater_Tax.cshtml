@@ -164,7 +164,6 @@
                                         if (currentMonthYear != lastMonthYear)
                                         {
                                             <tr class="table-white">
-                                                <td colspan="7" class="fw-bold text-center">@currentMonthYear</td>
                                             </tr>
                                             lastMonthYear = currentMonthYear;
                                         }
@@ -499,7 +498,7 @@
             }
 
             // Special validation for "Total Show" (must be at least 1)
-            if (input.classList.contains("totalShow") && numericValue < 1) {
+            if (input.classList.contains("totalShow") && numericValue < 0) {
                 errorSpan.innerText = "Total Show must be at least 1!";
                 input.classList.add("is-invalid");
                 return false;

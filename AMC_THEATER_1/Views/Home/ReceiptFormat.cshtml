@@ -26,42 +26,73 @@
     <div class="container d-flex justify-content-center">
         <div class="receipt-container bg-white p-3 border border-dark shadow w-100" id="receipt">
 
-            <!-- Logo -->
-            <div class="text-center mb-2">
-                <!-- Use Base64 encoded image here -->
-                <img src="~/Img/amc-logo.png"
-                     alt="Amdavad Municipal Corporation" width="100" id="receipt-logo">
+            <!-- Container for Logo and Header -->
+            <!-- Container for Logo and Header -->
+            <!-- Container for Logo, Header, and Receipt Details -->
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <!-- Logo and Header Section -->
+                <div class="d-flex align-items-center">
+                    <!-- Logo -->
+                    <div>
+                        <img src="~/Img/amc-logo.png"
+                             alt="Amdavad Municipal Corporation" width="90" id="receipt-logo">
+                    </div>
+
+                    <!-- Header and Theater Tax Info (Side by Side with Logo) -->
+                    <div class="d-flex flex-column ms-1">
+                        <!-- Header -->
+                        <h6 class="text-uppercase fw-bold pb-1 mb-2 text-start">
+                            Amdavad Municipal Corporation
+                        </h6>
+
+                        <!-- Theater Tax Details -->
+                        <div>
+                            <p class="mb-1"><span class="fw-bold">Theater Tax ID No:</span> T0010</p>
+                            <p class="mb-0"><span class="fw-bold">Old Theater Tax ID:</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Receipt Details (Aligned to Right in the Same Line) -->
+                <div class="text-start">
+                    <p class="mb-1"><span class="fw-bold">Receipt Number:</span> 2024250013251867</p>
+                    <p class="mb-1"><span class="fw-bold">Receipt Date:</span> 18-Feb-2025</p>
+                    <p class="mb-0"><span class="fw-bold">Receipt Year:</span> 2024-25</p>
+                </div>
             </div>
 
-            <!-- Header -->
-            <h5 class="text-center text-uppercase fw-bold border-bottom pb-1 mb-2">Amdavad Municipal Corporation</h5>
 
-            <!-- First Row: Tax No & Receipt Details -->
-            <div class="row text-sm">
-                <div class="col-6">
-                    <p><span class="fw-bold">Theater Tax ID No:</span> T0010</p>
-                    <p><span class="fw-bold">Old Theater Tax ID:</span></p>
-                </div>
-                <div class="col-6 text-start">
-                    <p><span class="fw-bold">Receipt Number:</span> 2024250013251867</p>
-                    <p><span class="fw-bold">Receipt Date:</span> 18-Feb-2025</p>
-                    <p><span class="fw-bold">Receipt Year:</span> 2024-25</p>
-                </div>
-            </div>
 
-            <hr class="border-2 border-dark">
+            <hr class="border-3 border-black">
 
             <!-- Second Row: Zone & Ward -->
-            <div class="d-flex justify-content-between text-sm">
-                <p><span class="fw-bold">Zone:</span> SOUTH</p>
-                <p><span class="fw-bold">Ward:</span> GORDHANVADI</p>
-            </div>
+            <table class=" text-sm w-100">
+                <tbody>
+                    <tr>
+                        <td class="fw-bold">Zone:</td>
+                        <td>SOUTH</td>
+                        <td colspan="2" class="text-end fw-bold">Ward:</td> <!-- Ensures alignment -->
+                        <td>GORDHANVADI</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold">Received From:</td>
+                        <td colspan="4">ASHISH NARENDRAPRASAD BHATT</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold">Est. Name / Type:</td>
+                        <td colspan="4">VISHESH PACKAGING INDUSTRIES PRIVATE LIMITED</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold">Employer Class:</td>
+                        <td colspan="4">DIRECTOR</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold">Years:</td>
+                        <td colspan="4">2024-25-January, 2024-25-March</td>
+                    </tr>
+                </tbody>
+            </table>
 
-            <!-- Received From & Other Details -->
-            <p class="text-sm"><span class="fw-bold">Received From:</span> ASHISH NARENDRAPRASAD BHATT</p>
-            <p class="text-sm"><span class="fw-bold">Est. Name / Type:</span> VISHESH PACKAGING INDUSTRIES PRIVATE LIMITED</p>
-            <p class="text-sm"><span class="fw-bold">Employer Class:</span> DIRECTOR</p>
-            <p class="text-sm"><span class="fw-bold">Years:</span> 2024-25-February, 2024-25-January</p>
 
             <hr class="border-2 border-dark">
 

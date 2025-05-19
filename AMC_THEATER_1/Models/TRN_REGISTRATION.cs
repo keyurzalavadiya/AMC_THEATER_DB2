@@ -35,7 +35,7 @@ namespace AMC_THEATER_1.Models
         public string LicenseHolderName { get; set; }
 
         [Column("MANAGER_CON_NO")]
-        public int? ManagerContactNo { get; set; } // Nullable INT
+        public string ManagerContactNo { get; set; } // Nullable INT
 
         [Required]
         [Column("MANAGER_NAME")]

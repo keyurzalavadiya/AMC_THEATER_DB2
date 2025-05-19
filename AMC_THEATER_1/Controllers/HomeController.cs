@@ -77,7 +77,7 @@ namespace Amc_theater.Controllers
                 T_PEC_NO = registration.TPecNo,
                 T_PRC_NO= registration.TPrcNo,
                 LicenseDate = registration.LicenseDate,
-                T_OWNER_NUMBER = (int)registration.ManagerContactNo,
+                T_OWNER_NUMBER = registration.ManagerContactNo,
 
                 // Fetch related data
                 Screens = db.NO_OF_SCREENS
@@ -103,25 +103,37 @@ namespace Amc_theater.Controllers
         {
             ViewBag.CurrentAction = "List of Application"; // ✅ Important for UI
             List<TheaterViewModel> theaterList = new List<TheaterViewModel>();
+
             try
             {
+                // Retrieve the phone number from the session
+                string sessionPhoneNumber = Session["PhoneNumber"]?.ToString();
+
+                if (string.IsNullOrEmpty(sessionPhoneNumber))
+                {
+                    TempData["ErrorMessage"] = "Session expired or phone number missing. Please log in again.";
+                    return RedirectToAction("Login", "Home");
+                }
+
+                // Fetch only records matching the phone number stored in session
                 var query = from tr in db.TRN_REGISTRATION
-                      where tr.TActive == 1
-                      select new
-                      {
-                          tr.TId,
-                          tr.ApplId,
-                          tr.TName,
-                          tr.TCity,
-                          tr.TAddress,
-                          tr.TTenamentNo,
-                          tr.TZone,
-                          tr.TWard,
-                          tr.TStatus,
-                          tr.RejectReason,
-                          tr.UpdateDate,
-                          tr.TCommencementDate,
-                      };
+                            where tr.TActive == 1 && tr.ManagerContactNo.ToString() == sessionPhoneNumber
+                            select new
+                            {
+                                tr.TId,
+                                tr.ApplId,
+                                tr.TName,
+                                tr.TCity,
+                                tr.TAddress,
+                                tr.TTenamentNo,
+                                tr.TZone,
+                                tr.TWard,
+                                tr.TStatus,
+                                tr.RejectReason,
+                                tr.UpdateDate,
+                                tr.TCommencementDate,
+                            };
+
                 var result = query.ToList();
                 theaterList = result.Select(tr => new TheaterViewModel
                 {
@@ -142,16 +154,18 @@ namespace Amc_theater.Controllers
             catch (Exception ex)
             {
                 // 🔴 Log the detailed error, including inner exceptions
-                 var errorMessage = $"Edit Error: {ex.Message}";
+                var errorMessage = $"List_of_Application Error: {ex.Message}";
                 if (ex.InnerException != null)
                 {
                     errorMessage += $" | Inner Exception: {ex.InnerException.Message}";
                 }
-                // Log to a file or database (replace with your logger)
-                 System.Diagnostics.Debug.WriteLine(errorMessage);
+                // Log error message (replace with your logger)
+                System.Diagnostics.Debug.WriteLine(errorMessage);
+
                 TempData["ErrorMessage"] = "An error occurred while processing your request. Please try again later.";
                 return RedirectToAction("List_of_Application", "Home");
             }
+
             return View(theaterList);
         }
 
@@ -563,7 +577,7 @@ namespace Amc_theater.Controllers
             {
                 // Fetch all approved theaters from DB
                 var theaters = db.TRN_REGISTRATION
-                    .Where(tr => tr.TStatus == "Approved" && tr.LicenseDate.HasValue && (tr.TActive.HasValue && tr.TActive.Value == 1)) // ✅ Compare with 1 instead of true
+                    .Where(tr => tr.TStatus == "Approved" && tr.CreateDate.HasValue && (tr.TActive.HasValue && tr.TActive.Value == 1)) // ✅ Compare with 1 instead of true
                     .Select(tr => new
                     {
                         tr.TId,
@@ -634,7 +648,7 @@ namespace Amc_theater.Controllers
             {
                 // Fetch all approved theaters from DB
                 var theaters = db.TRN_REGISTRATION
-                    .Where(tr => tr.TStatus == "Approved" && tr.LicenseDate.HasValue) // Ensure LICENSE_DATE exists
+                    .Where(tr => tr.TStatus == "Approved" && tr.CreateDate.HasValue) // Ensure LICENSE_DATE exists
                     .Select(tr => new
                     {
                         tr.TId,
@@ -702,25 +716,44 @@ namespace Amc_theater.Controllers
 
             return View();
         }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Login(LoginViewModel model)
         {
+            try
             {
-                // Ensure phone numbers are compared as strings
-                var userExists = db.USER_LOGIN_DETAILS
-                    .Any(u => u.PhoneNumber.ToString() == model.PhoneNumber);
+                // Ensure the model's PhoneNumber is not null or empty
+                if (string.IsNullOrWhiteSpace(model.PhoneNumber))
+                {
+                    ModelState.AddModelError("PhoneNumber", "Phone number is required.");
+                    return View(model);
+                }
+
+                // Check if the phone number exists in the database
+                bool userExists = db.USER_LOGIN_DETAILS.Any(u => u.PhoneNumber == model.PhoneNumber);
 
                 if (!userExists)
                 {
                     ModelState.AddModelError("PhoneNumber", "Phone number not found.");
                     return View(model);
                 }
-            }
 
-            return RedirectToAction("Registration", "Registration");
+                // ✅ Store phone number in Session as a string
+                Session["PhoneNumber"] = model.PhoneNumber;
+
+                return RedirectToAction("Registration", "Registration");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+                Console.WriteLine("Inner Exception: " + ex.InnerException?.Message);
+                throw; // Rethrow the exception for debugging
+            }
         }
+
+
+
+
 
         public ActionResult Department_Login()
         {
@@ -915,7 +948,7 @@ namespace Amc_theater.Controllers
                     {
                         // Fetch all approved theaters from DB
                         var theaters = db.TRN_REGISTRATION
-                            .Where(tr => tr.TStatus == "Approved" && tr.TCommencementDate.HasValue && (tr.TActive.HasValue && tr.TActive.Value == 1)) // ✅ Compare with 1 instead of true
+                            .Where(tr => tr.TStatus == "Approved" && tr.CreateDate.HasValue && (tr.TActive.HasValue && tr.TActive.Value == 1)) // ✅ Compare with 1 instead of true
                             .Select(tr => new
                             {
                                 tr.ApplId,
@@ -1050,6 +1083,7 @@ namespace Amc_theater.Controllers
                         .Select(tr => new
                         {
                             tr.ApplId,
+                            tr.TId,
                             tr.TName,
                             tr.TCity,
                             tr.TWard,
@@ -1057,7 +1091,7 @@ namespace Amc_theater.Controllers
                             tr.TAddress,
                             tr.TTenamentNo,
                             tr.TStatus,
-                            LicenseDate = tr.LicenseDate ?? new DateTime(2000, 1, 1) // ✅ Default if null
+                            CreateDate = tr.CreateDate ?? new DateTime(2000, 1, 1) // ✅ Default if null
                         })
                         .ToList();
 
@@ -1070,7 +1104,7 @@ namespace Amc_theater.Controllers
 
                     foreach (var theater in theaters)
                     {
-                        DateTime startDate = theater.LicenseDate > currentDate ? currentDate : theater.LicenseDate;
+                        DateTime startDate = theater.CreateDate > currentDate ? currentDate : theater.CreateDate;
 
                         for (DateTime date = startDate; date <= currentDate; date = date.AddMonths(1))
                         {
@@ -1086,6 +1120,7 @@ namespace Amc_theater.Controllers
                             theaterDueList.Add(new TheaterViewModel
                             {
                                 ApplId = theater.ApplId,
+                                T_ID = theater.TId,
                                 T_NAME = theater.TName,
                                 T_CITY = theater.TCity,
                                 T_WARD = theater.TWard,
@@ -1133,7 +1168,7 @@ namespace Amc_theater.Controllers
                             tr.TAddress,
                             tr.TTenamentNo,
                             tr.TStatus,
-                            LicenseDate = tr.LicenseDate ?? new DateTime(2000, 1, 1) // ✅ Default if null
+                            CreateDate = tr.CreateDate ?? new DateTime(2000, 1, 1) // ✅ Default if null
                         })
                         .ToList();
 
@@ -1145,7 +1180,7 @@ namespace Amc_theater.Controllers
 
                     foreach (var theater in theaters)
                     {
-                        DateTime startDate = theater.LicenseDate;
+                        DateTime startDate = theater.CreateDate;
                         DateTime endDate = DateTime.Now;
 
                         if (fromDate.HasValue && toDate.HasValue)
@@ -1188,5 +1223,6 @@ namespace Amc_theater.Controllers
             }
         }
     }
+
 
 

@@ -11,10 +11,10 @@ namespace AMC_THEATER_1.Models
         public class USER_LOGIN_DETAILS
         {
         [Key]
-
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int LogId { get; set; }
 
         [Column("PHONE_NUMBER")]
-        public long PhoneNumber { get; set; } // Changed to long to store full phone numbers
+        public string PhoneNumber { get; set; } // Changed to long to store full phone numbers
         }
 }

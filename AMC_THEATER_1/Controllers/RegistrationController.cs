@@ -187,7 +187,7 @@ namespace AMC_THEATER_1.Controllers
                         db.SaveChanges(); // Final save
 
                         transaction.Commit();
-                        return RedirectToAction("List_of_Application", "Home");
+                        return RedirectToAction("ActionRequests", "Home");
                     }
                 }
 
