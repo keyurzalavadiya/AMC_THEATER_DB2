@@ -618,73 +618,165 @@ ViewBag.TotalAmount = latestAmt;
 
         public ActionResult PendingDuesDept()
         {
-            // Get current month and year
             int currentYear = DateTime.Now.Year;
             int currentMonth = DateTime.Now.Month;
-            {
-                // Fetch all approved theaters from DB
-                var theaters = db.TRN_REGISTRATION
-                    .Where(tr => tr.TStatus == "Approved" && tr.CreateDate.HasValue && (tr.TActive.HasValue && tr.TActive.Value == 1)) // ✅ Compare with 1 instead of true
-                    .Select(tr => new
-                    {
-                        tr.TId,
-                        tr.TName,
-                        tr.TCity,
-                        tr.TWard,
-                        tr.TZone,
-                        tr.TAddress,
-                        tr.TTenamentNo,
-                        tr.TStatus,
-                        tr.LicenseDate
-                    })
-                    .ToList(); // Execute in memory
 
-                // Create list to store each month's pending payment status
-                var theaterDueList = new List<TheaterViewModel>();
-
-                // Loop through each theater and generate month-wise payment status
-                foreach (var theater in theaters)
+            var theaters = db.TRN_REGISTRATION
+                .Where(tr => tr.TActive.Value == 1 && tr.TStatus == "Approved")
+                .Select(tr => new
                 {
-                    DateTime startDate = theater.LicenseDate.Value;
-                    DateTime currentDate = new DateTime(currentYear, currentMonth, 1);
+                    tr.TId,
+                    tr.TName,
+                    tr.TCity,
+                    tr.TAddress,
+                    tr.TTenamentNo,
+                    tr.TZone,
+                    tr.TWard,
+                    tr.TStatus,
+                    tr.RejectReason,
+                    tr.UpdateDate,
+                    tr.TCommencementDate
+                })
+                .ToList();
 
-                    // Ensure startDate is before or equal to currentDate
-                    if (startDate > currentDate)
-                        continue; // Skip if the LICENSE_DATE is in the future
+            var theaterList = new List<TheaterViewModel>();
 
-                    // Generate months from LICENSE_DATE to current month
-                    for (DateTime date = startDate; date <= currentDate; date = date.AddMonths(1))
+            foreach (var theater in theaters)
+            {
+                if (!theater.TCommencementDate.HasValue) continue; // Skip if no commencement date
+
+                DateTime startDate = theater.TCommencementDate.Value;
+                DateTime currentDate = new DateTime(currentYear, currentMonth, 1);
+
+                for (DateTime date = startDate; date <= currentDate; date = date.AddMonths(1))
+                {
+                    string monthName = date.ToString("MMMM", System.Globalization.CultureInfo.InvariantCulture);
+                    int year = date.Year;
+
+                    bool isPaid = db.THEATER_TAX_PAYMENT.Any(tp => tp.TId == theater.TId && tp.PaymentMonth == monthName && tp.PaymentYear == year);
+
+                    if (!isPaid) // ✅ Show only NOT PAID records
                     {
-                        string monthName = date.ToString("MMMM", System.Globalization.CultureInfo.InvariantCulture); // Ensure correct case
-                        int year = date.Year;
-
-                        bool isPaid = db.THEATER_TAX_PAYMENT
-                            .Any(tp => tp.TId == theater.TId
-                                    && tp.PaymentMonth == monthName
-                                    && tp.PaymentYear == year);
-
-                        if (!isPaid) // Only add if payment is NOT made
+                        theaterList.Add(new TheaterViewModel
                         {
-                            theaterDueList.Add(new TheaterViewModel
-                            {
-                                T_ID = theater.TId,
-                                T_NAME = theater.TName,
-                                T_CITY = theater.TCity,
-                                T_WARD = theater.TWard,
-                                T_ZONE = theater.TZone,
-                                T_ADDRESS = theater.TAddress,
-                                T_TENAMENT_NO = theater.TTenamentNo,
-                                T_STATUS = theater.TStatus,
-                                SINCE_MONTH = date.ToString("MMMM yyyy"), // Display as "March 2025"
-                                PAYMENT_STATUS = "Not Paid"
-                            });
-                        }
+                            T_ID = theater.TId,
+                            T_NAME = theater.TName,
+                            T_CITY = theater.TCity,
+                            T_ADDRESS = theater.TAddress,
+                            T_TENAMENT_NO = theater.TTenamentNo,
+                            T_ZONE = theater.TZone,
+                            T_WARD = theater.TWard,
+                            T_STATUS = theater.TStatus,
+                            REJECT_REASON = theater.RejectReason,
+                            T_COMMENCEMENT_DATE = startDate,
+                            UPDATE_DATE = theater.UpdateDate ?? DateTime.MinValue,
+                            SINCE_MONTH = date.ToString("MMMM yyyy"),
+                            PAYMENT_STATUS = "Not Paid"
+                        });
                     }
                 }
-
-                return View(theaterDueList);
             }
+
+            return View(theaterList);
         }
+
+        [HttpPost]
+        public ActionResult PendingDuesDept(string theaterId, string fromDate, string toDate, string cityFilter, string wardFilter, string zoneFilter, string statusFilter)
+        {
+            int currentYear = DateTime.Now.Year;
+            int currentMonth = DateTime.Now.Month;
+
+            var theaters = db.TRN_REGISTRATION
+                .Where(tr => tr.TStatus == "Approved" && tr.CreateDate.HasValue && (tr.TActive.HasValue && tr.TActive.Value == 1))
+                .Select(tr => new
+                {
+                    tr.TId,  // ✅ TId is already a string in the database
+                    tr.TName,
+                    tr.TCity,
+                    tr.TWard,
+                    tr.TZone,
+                    tr.TAddress,
+                    tr.TTenamentNo,
+                    tr.TStatus,
+                    tr.LicenseDate
+                })
+                .ToList();
+
+            var theaterDueList = new List<TheaterViewModel>();
+
+            foreach (var theater in theaters)
+            {
+                DateTime startDate = theater.LicenseDate.Value;
+                DateTime currentDate = new DateTime(currentYear, currentMonth, 1);
+
+                if (startDate > currentDate) continue;
+
+                for (DateTime date = startDate; date <= currentDate; date = date.AddMonths(1))
+                {
+                    string monthName = date.ToString("MMMM", System.Globalization.CultureInfo.InvariantCulture);
+                    int year = date.Year;
+
+                    bool isPaid = db.THEATER_TAX_PAYMENT.Any(tp => tp.TId == theater.TId && tp.PaymentMonth == monthName && tp.PaymentYear == year);
+
+                    if (!isPaid)
+                    {
+                        theaterDueList.Add(new TheaterViewModel
+                        {
+                            T_ID = theater.TId,  // ✅ TId remains a string
+                            T_NAME = theater.TName,
+                            T_CITY = theater.TCity,
+                            T_WARD = theater.TWard,
+                            T_ZONE = theater.TZone,
+                            T_ADDRESS = theater.TAddress,
+                            T_TENAMENT_NO = theater.TTenamentNo,
+                            T_STATUS = theater.TStatus,
+                            SINCE_MONTH = date.ToString("MMMM yyyy"),
+                            PAYMENT_STATUS = "Not Paid"
+                        });
+                    }
+                }
+            }
+
+            // ✅ Apply Filters
+            if (!string.IsNullOrEmpty(theaterId))
+            {
+                theaterDueList = theaterDueList.Where(t => t.T_ID.Equals(theaterId, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            if (!string.IsNullOrEmpty(fromDate) && DateTime.TryParse(fromDate, out DateTime fromDt))
+            {
+                theaterDueList = theaterDueList.Where(t => DateTime.Parse(t.SINCE_MONTH) >= fromDt).ToList();
+            }
+
+            if (!string.IsNullOrEmpty(toDate) && DateTime.TryParse(toDate, out DateTime toDt))
+            {
+                theaterDueList = theaterDueList.Where(t => DateTime.Parse(t.SINCE_MONTH) <= toDt).ToList();
+            }
+
+            if (!string.IsNullOrEmpty(cityFilter))
+            {
+                theaterDueList = theaterDueList.Where(t => t.T_CITY.Equals(cityFilter, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            if (!string.IsNullOrEmpty(wardFilter))
+            {
+                theaterDueList = theaterDueList.Where(t => t.T_WARD.Equals(wardFilter, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            if (!string.IsNullOrEmpty(zoneFilter))
+            {
+                theaterDueList = theaterDueList.Where(t => t.T_ZONE.Equals(zoneFilter, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            if (!string.IsNullOrEmpty(statusFilter))
+            {
+                theaterDueList = theaterDueList.Where(t => t.T_STATUS.Equals(statusFilter, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            return View(theaterDueList);
+        }
+
+
 
         [HttpGet]
         public ActionResult PaymentList()
@@ -755,6 +847,103 @@ ViewBag.TotalAmount = latestAmt;
                 return View(theaterDueList);
             }
         }
+
+        [HttpPost]
+        public ActionResult PaymentList(string theaterId, string fromDate, string toDate, string cityFilter, string wardFilter, string zoneFilter, string statusFilter)
+        {
+            int currentYear = DateTime.Now.Year;
+            int currentMonth = DateTime.Now.Month;
+
+            var theaters = db.TRN_REGISTRATION
+                .Where(tr => tr.TStatus == "Approved" && tr.CreateDate.HasValue && (tr.TActive.HasValue && tr.TActive.Value == 1))
+                .Select(tr => new
+                {
+                    tr.TId,
+                    tr.TName,
+                    tr.TCity,
+                    tr.TWard,
+                    tr.TZone,
+                    tr.TAddress,
+                    tr.TTenamentNo,
+                    tr.TStatus,
+                    tr.LicenseDate
+                })
+                .ToList();
+
+            var theaterPaidList = new List<TheaterViewModel>();
+
+            foreach (var theater in theaters)
+            {
+                DateTime startDate = theater.LicenseDate.Value;
+                DateTime currentDate = new DateTime(currentYear, currentMonth, 1);
+
+                if (startDate > currentDate) continue;
+
+                for (DateTime date = startDate; date <= currentDate; date = date.AddMonths(1))
+                {
+                    string monthName = date.ToString("MMMM", System.Globalization.CultureInfo.InvariantCulture);
+                    int year = date.Year;
+
+                    bool isPaid = db.THEATER_TAX_PAYMENT.Any(tp => tp.TId == theater.TId && tp.PaymentMonth == monthName && tp.PaymentYear == year);
+
+                    if (isPaid)
+                    {
+                        theaterPaidList.Add(new TheaterViewModel
+                        {
+                            T_ID = theater.TId,
+                            T_NAME = theater.TName,
+                            T_CITY = theater.TCity,
+                            T_WARD = theater.TWard,
+                            T_ZONE = theater.TZone,
+                            T_ADDRESS = theater.TAddress,
+                            T_TENAMENT_NO = theater.TTenamentNo,
+                            T_STATUS = theater.TStatus,
+                            SINCE_MONTH = date.ToString("MMMM yyyy"),
+                            PAYMENT_STATUS = "Paid"
+                        });
+                    }
+                }
+            }
+
+            // Apply Filters
+            if (!string.IsNullOrEmpty(theaterId))
+            {
+                theaterPaidList = theaterPaidList.Where(t => t.T_ID.Equals(theaterId, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            if (!string.IsNullOrEmpty(fromDate) && DateTime.TryParse(fromDate, out DateTime fromDt))
+            {
+                theaterPaidList = theaterPaidList.Where(t => DateTime.Parse(t.SINCE_MONTH) >= fromDt).ToList();
+            }
+
+            if (!string.IsNullOrEmpty(toDate) && DateTime.TryParse(toDate, out DateTime toDt))
+            {
+                theaterPaidList = theaterPaidList.Where(t => DateTime.Parse(t.SINCE_MONTH) <= toDt).ToList();
+            }
+
+            if (!string.IsNullOrEmpty(cityFilter))
+            {
+                theaterPaidList = theaterPaidList.Where(t => t.T_CITY.Equals(cityFilter, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            if (!string.IsNullOrEmpty(wardFilter))
+            {
+                theaterPaidList = theaterPaidList.Where(t => t.T_WARD.Equals(wardFilter, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            if (!string.IsNullOrEmpty(zoneFilter))
+            {
+                theaterPaidList = theaterPaidList.Where(t => t.T_ZONE.Equals(zoneFilter, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            if (!string.IsNullOrEmpty(statusFilter))
+            {
+                theaterPaidList = theaterPaidList.Where(t => t.T_STATUS.Equals(statusFilter, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            return View(theaterPaidList);
+        }
+
 
         public ActionResult Login()
         {

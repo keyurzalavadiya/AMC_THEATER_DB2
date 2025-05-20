@@ -30,8 +30,8 @@
 
     <div class="container me-5 pe-5 justify-content-center">
         <div class="w-100 pe-5">
-            <div class="me-5">
-                <h2 class="mb-1 me-5 text-center">Payment History</h2>
+            <div class="fw-bold">
+                <h1 class="text-center bg-light p-3 pe-5 w-100">Payment History</h1>
             </div>
             <div class="me-5">
                 <div class="me-5">
@@ -43,58 +43,17 @@
                                 <input type="text" id="theaterId" name="theaterId" class="form-control form-control-sm" />
                             </div>
 
-                            <!-- Start Date -->
-                            <div class="col-md-3 d-inline-block">
-                                <label for="fromMonth" class="fw-bold text-dark" style="font-size: 14px;">From Date:</label>
-                                <div class="d-flex gap-2">
-                                    @Html.DropDownList("fromMonth", new List<SelectListItem>
-                                    {
-                                        new SelectListItem { Text = "January", Value = "01" },
-                                        new SelectListItem { Text = "February", Value = "02" },
-                                        new SelectListItem { Text = "March", Value = "03" },
-                                        new SelectListItem { Text = "April", Value = "04" },
-                                        new SelectListItem { Text = "May", Value = "05" },
-                                        new SelectListItem { Text = "June", Value = "06" },
-                                        new SelectListItem { Text = "July", Value = "07" },
-                                        new SelectListItem { Text = "August", Value = "08" },
-                                        new SelectListItem { Text = "September", Value = "09" },
-                                        new SelectListItem { Text = "October", Value = "10" },
-                                        new SelectListItem { Text = "November", Value = "11" },
-                                        new SelectListItem { Text = "December", Value = "12" }
-                                    }, "Month", new { @class = "form-control form-control-sm" })
-
-                                    @Html.DropDownList("fromYear", new SelectList(Enumerable.Range(2000, 25).Select(x => new SelectListItem { Value = x.ToString(), Text = x.ToString() }), "Value", "Text"), "Year", new { @class = "form-control form-control-sm" })
-                                </div>
+                            <div class="col-md-3">
+                                <label for="fromDate" class="fw-bold text-dark" style="font-size: 14px;">From Month:</label>
+                                <input type="month" id="fromDate" name="fromDate" class="form-control form-control-sm"
+                                       value="@Request.QueryString["fromDate"]" />
                             </div>
 
-                            <!-- End Date -->
-                            <div class="col-md-3 d-inline-block">
-                                <label for="toMonth" class="fw-bold text-dark" style="font-size: 14px;">To Date:</label>
-                                <div class="d-flex gap-2">
-                                    @Html.DropDownList("toMonth", new List<SelectListItem>
-                                    {
-                                        new SelectListItem { Text = "January", Value = "01" },
-                                        new SelectListItem { Text = "February", Value = "02" },
-                                        new SelectListItem { Text = "March", Value = "03" },
-                                        new SelectListItem { Text = "April", Value = "04" },
-                                        new SelectListItem { Text = "May", Value = "05" },
-                                        new SelectListItem { Text = "June", Value = "06" },
-                                        new SelectListItem { Text = "July", Value = "07" },
-                                        new SelectListItem { Text = "August", Value = "08" },
-                                        new SelectListItem { Text = "September", Value = "09" },
-                                        new SelectListItem { Text = "October", Value = "10" },
-                                        new SelectListItem { Text = "November", Value = "11" },
-                                        new SelectListItem { Text = "December", Value = "12" }
-                                    }, "Month", new { @class = "form-control form-control-sm" })
-
-                                    @Html.DropDownList("toYear", new SelectList(Enumerable.Range(2000, 26).Select(x => new SelectListItem { Value = x.ToString(), Text = x.ToString() }), "Value", "Text"), "Year", new { @class = "form-control form-control-sm" })
-                                </div>
-                            </div>
-
-                            <!-- Status Filter -->
-                            <div class="col-md-3 d-inline-block">
-                                <label for="statusFilter" class="fw-bold text-dark" style="font-size: 14px;">Status:</label>
-                                @Html.DropDownList("statusFilter", ViewBag.StatusFilterOptions as SelectList, new { @class = "form-control form-control-sm" })
+                            <!-- To Date -->
+                            <div class="col-md-3">
+                                <label for="toDate" class="fw-bold text-dark" style="font-size: 14px;">To Month:</label>
+                                <input type="month" id="toDate" name="toDate" class="form-control form-control-sm"
+                                       value="@Request.QueryString["toDate"]" />
                             </div>
                         </div>
 
@@ -114,7 +73,7 @@
                             <tr>
                                 <th class="fw-bold">Theater ID</th>
                                 <th class="fw-bold">Theater Name</th>
-                                <th class="fw-bold">City</th>
+                                @*<th class="fw-bold">City</th>*@
                                 <th class="fw-bold">Ward</th>
                                 <th class="fw-bold">Zone</th>
                                 <th class="fw-bold">Address</th>
@@ -131,7 +90,6 @@
                                     <tr id="theater-@theater.T_ID">
                                         <td>@theater.T_ID</td>
                                         <td>@theater.T_NAME</td>
-                                        <td>@theater.T_CITY</td>
                                         <td>@theater.T_WARD</td>
                                         <td>@theater.T_ZONE</td>
                                         <td>@theater.T_ADDRESS</td>
@@ -139,9 +97,6 @@
                                         <td class="@(theater.PAYMENT_STATUS == "Paid" ? "text-success fw-bold" : "text-danger fw-bold")">
                                             @theater.PAYMENT_STATUS
                                         </td>
-
-
-
                                         <td>@theater.SINCE_MONTH</td> <!-- New Data Column -->
                                     </tr>
                                 }
@@ -165,6 +120,6 @@
 <script>
     function resetForm() {
         document.getElementById("filterForm").reset();
-        window.location.href = '@Url.Action("PaymentList", "Department")';
+        window.location.href = '@Url.Action("PaymentList", "Home")';
     }
 </script>
