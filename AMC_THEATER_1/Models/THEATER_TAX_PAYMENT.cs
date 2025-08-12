@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Web;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AMC_THEATER_1.Models
 {
@@ -11,34 +8,41 @@ namespace AMC_THEATER_1.Models
     public class THEATER_TAX_PAYMENT
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Column("TAX_ID")]
+        public int TaxId { get; set; }  // Primary Key ✅ Matches DB2 schema
 
-        public int TaxId { get; set; }
+        [ForeignKey("TRN_REGISTRATION")]
+        [Column("APPL_ID")]
+        public int? ApplId { get; set; } // ✅ Foreign Key referencing TRN_REGISTRATION (Nullable)
 
-       
-        public int? ApplId { get; set; } // Foreign key to TRN_REGISTRATION
+        [Column("T_ID")]
+        public string TId { get; set; } // VARCHAR(50) ✅
 
-        
-        public string TId { get; set; }
+        [Required]
+        [Column("PAYMENT_MONTH")]
+        public string PaymentMonth { get; set; } // VARCHAR(20) ✅
 
-        
-        public string PaymentMonth { get; set; }
+        [Required]
+        [Column("PAYMENT_YEAR")]
+        public int PaymentYear { get; set; } // INT ✅
 
-       
-        public int PaymentYear { get; set; }
+        [Required]
+        [Column("TAX_AMOUNT")]
+        public decimal TaxAmount { get; set; } // DECIMAL(18,2) ✅
 
-        
-        public decimal TaxAmount { get; set; }
+        [Column("SHOW_STATEMENT")]
+        public string ShowStatement { get; set; } // VARCHAR(32672) ✅
 
-       
-        public string ShowStatement { get; set; }
+        [Required]
+        [Column("CREATE_USER")]
+        public string CreateUser { get; set; } // VARCHAR(50) ✅
 
-       
-        public string CreateUser { get; set; }
+        [Required]
+        [Column("CREATE_DATE")]
+        public DateTime CreateDate { get; set; } = DateTime.Now; // TIMESTAMP DEFAULT CURRENT_TIMESTAMP ✅
 
-       
-        public DateTime CreateDate { get; set; } = DateTime.Now;
-
-        // Navigation Property
+        // ✅ Navigation Properties
         public virtual TRN_REGISTRATION TRN_REGISTRATION { get; set; }
     }
 }

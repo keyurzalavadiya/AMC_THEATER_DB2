@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Web;
 
@@ -8,8 +9,11 @@ namespace AMC_THEATER_1.Models
 {
     public class TaxPaymentViewModel
     {
+
         [Required]
-        public int TheaterId { get; set; }
+        [Column("APPL_ID")] // ✅ Keep only column mapping
+
+        public int ApplId { get; set; }
         public string TheaterName { get; set; }
 
         [Required]

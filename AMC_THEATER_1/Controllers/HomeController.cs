@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using System.Data.Entity.Validation;
 using System.Data.SqlClient;
 using System.Diagnostics;
@@ -175,7 +176,7 @@ namespace Amc_theater.Controllers
 
             var model = new TaxPaymentViewModel
             {
-                TheaterId = theater_id,
+                ApplId = theater_id,
                 FromMonth = DateTime.Now.ToString("MMMM"), // Default to current month
                 ToMonth = DateTime.Now.Year.ToString() // ✅ Convert int to string
             };
@@ -437,7 +438,7 @@ namespace Amc_theater.Controllers
                         {
                             var taxPayment = new THEATER_TAX_PAYMENT
                             {
-                                TId = model.TheaterId.ToString(),
+                                ApplId = model.ApplId,
                                 PaymentMonth = currentDate.ToString("MMMM"),
                                 PaymentYear = currentDate.Year,
                                 TaxAmount = model.Screens.Sum(s => s.AmtPerScreen),
@@ -454,7 +455,7 @@ namespace Amc_theater.Controllers
                             {
                                 var screenTax = new NO_OF_SCREENS_TAX
                                 {
-                                    TId = model.TheaterId.ToString(),
+                                    TId = model.ApplId.ToString(),
                                     STaxId = taxPayment.TaxId,
                                     ScreenType = screen.ScreenType ?? "Unknown",
                                     TotalShow = screen.TotalShow,
@@ -473,11 +474,13 @@ namespace Amc_theater.Controllers
                         TempData["Success"] = "Tax payment saved successfully!";
                         return RedirectToAction("Theater_Tax");
                     }
-                    catch (Exception ex)
+                    catch (DbUpdateException ex)
                     {
                         transaction.Rollback();
-                        TempData["Error"] = "An error occurred while processing your request: " + ex.Message;
-                        return RedirectToAction("Index");
+                        conn.Close();
+                        Debug.WriteLine($"DB2 Error: {ex.InnerException?.InnerException?.Message}");
+                        TempData["ErrorMessage"] = "Database update error. Check logs for details.";
+                        return View(model);
                     }
                     finally
                     {
@@ -572,7 +575,7 @@ namespace Amc_theater.Controllers
 
             var model = new TaxPaymentViewModel
             {
-                TheaterId = theater_id,
+                ApplId = theater_id,
                 FromMonth = DateTime.Now.ToString("MMMM"), // Default to current month
                 ToMonth = DateTime.Now.Year.ToString() // ✅ Convert int to string
             };
@@ -801,7 +804,7 @@ namespace Amc_theater.Controllers
                             {
                                 var taxPayment = new THEATER_TAX_PAYMENT
                                 {
-                                    TId = model.TheaterId.ToString(),
+                                    ApplId = model.ApplId,
                                     PaymentMonth = currentDate.ToString("MMMM"), // Store the correct month name dynamically
                                     PaymentYear = currentDate.Year, // Ensure the correct year is stored
                                     TaxAmount = model.Screens.Sum(s => s.AmtPerScreen),
@@ -816,7 +819,7 @@ namespace Amc_theater.Controllers
                                 {
                                     var screenTax = new NO_OF_SCREENS_TAX
                                     {
-                                        TId = model.TheaterId.ToString(),
+                                        ApplId = model.ApplId,
                                         TaxId = taxPayment.TaxId,
                                         ScreenType = screen.ScreenType,
                                         TotalShow = screen.TotalShow,

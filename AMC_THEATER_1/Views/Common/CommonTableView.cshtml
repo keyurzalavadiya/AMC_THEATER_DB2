@@ -159,7 +159,7 @@
                                     <td class="sticky-column-right">
                                         @if (isActionRequests)
                                         {
-                                            <a href="@Url.Action("Registration", "Registration", new { id = theater.T_ID, mode="approve" })"
+                                            <a href="@Url.Action("Edit", "Registration", new { id = theater.ApplId, mode="approve" })"
                                                class="btn btn-secondary btn-sm" title="View">
                                                 <i class="fa fa-eye"></i>
                                             </a>

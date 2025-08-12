@@ -21,7 +21,7 @@ namespace AMC_THEATER_1.Models
 
         // ✅ Foreign Key - Ensure correct mapping
         [Required]
-        [Column("\"APPL_ID\"")] // 🔄 Ensure case-sensitive match with DB2
+        [Column("APPL_ID")] // 🔄 Ensure case-sensitive match with DB2
         public int ApplId { get; set; } // ✅ Foreign Key from TRN_REGISTRATION
 
         //// ✅ Foreign Key Navigation Property

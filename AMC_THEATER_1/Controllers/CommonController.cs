@@ -2,7 +2,9 @@
 using IBM.Data.DB2;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity.Infrastructure;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -577,7 +579,8 @@ namespace AMC_THEATER_1.Controllers
         {
             return View();
         }
-            [HttpPost]
+
+        [HttpPost]
         public ActionResult Theater_Tax(int theater_id)
         {
             if (theater_id <= 0)
@@ -588,7 +591,7 @@ namespace AMC_THEATER_1.Controllers
 
             var model = new TaxPaymentViewModel
             {
-                TheaterId = theater_id,
+                ApplId = theater_id,
                 FromMonth = DateTime.Now.ToString("MMMM"), // Default to current month
                 ToMonth = DateTime.Now.Year.ToString() // ✅ Convert int to string
             };
@@ -603,9 +606,9 @@ namespace AMC_THEATER_1.Controllers
                     using (var db = new ApplicationDbContext()) // Use Entity Framework context
                     {
                         // ✅ Step 1: Fetch screen prices first and store in memory
-                        var screenPrices = db.MST_TT_TYPE
+                        var screenPrices = db1.MST_TT_TYPE
                             .AsNoTracking() // Improves performance
-                            .ToDictionary(p => p.ScreenPrice, p => p.ScreenType);
+                            .ToDictionary(p => p.ScreenType, p => p.ScreenPrice);
 
                         // ✅ Step 2: Fetch theater details along with associated screens
                         var theaterDetails = db.TRN_REGISTRATION
@@ -618,7 +621,7 @@ namespace AMC_THEATER_1.Controllers
                                 Address = t.TAddress,
                                 Email = t.TEmail,
                                 Screens = db.NO_OF_SCREENS
-                                    .Where(s => s.ApplId.ToString() == t.TId)
+                                    .Where(s => s.ApplId == t.ApplId)
                                     .ToList() // ✅ Move data to memory first
                             })
                             .FirstOrDefault();
@@ -660,6 +663,134 @@ namespace AMC_THEATER_1.Controllers
                 }
             }
         }
+
+        [HttpPost]
+        public ActionResult ProcessTaxPayment(TaxPaymentViewModel model, HttpPostedFileBase DocumentPath, FormCollection form)
+        {
+            // ✅ Debug log to check received data
+            System.Diagnostics.Debug.WriteLine("Received Model: " + Newtonsoft.Json.JsonConvert.SerializeObject(model));
+
+            using (DB2Connection conn = new DB2Connection("Database=prddb1;uid=prdinst1;pwd=prdinst1;Server=123.63.211.14:50000;"))
+            {
+                conn.Open(); // ✅ Open DB2 Connection
+                using (var transaction = db1.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        string filePath = "Generated Automatically";
+
+                        // ✅ **Step 1: Handle File Upload**
+                        if (DocumentPath != null && DocumentPath.ContentLength > 0)
+                        {
+                            string fileName = Path.GetFileName(DocumentPath.FileName);
+                            string uploadPath = Path.Combine(Server.MapPath("~/UploadedDoc/"), fileName);
+
+                            if (!Directory.Exists(Server.MapPath("~/UploadedDoc/")))
+                            {
+                                Directory.CreateDirectory(Server.MapPath("~/UploadedDoc/"));
+                            }
+
+                            DocumentPath.SaveAs(uploadPath);
+                            filePath = "/UploadedDoc/" + fileName;
+                        }
+
+                        // ✅ **Step 2: Validate FromMonth & ToMonth**
+                        if (string.IsNullOrWhiteSpace(model.FromMonth) || string.IsNullOrWhiteSpace(model.ToMonth))
+                        {
+                            TempData["Error"] = "From Month and To Month cannot be empty.";
+                            return RedirectToAction("Index");
+                        }
+
+                        if (!DateTime.TryParseExact(model.FromMonth + "-01", "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out DateTime fromDate) ||
+                            !DateTime.TryParseExact(model.ToMonth + "-01", "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out DateTime toDate))
+                        {
+                            TempData["Error"] = "Invalid date format. Please select valid From and To months.";
+                            return RedirectToAction("Index");
+                        }
+
+                        // ✅ **Step 3: Ensure Screens List is Populated**
+                        if (model.Screens == null || model.Screens.Count == 0)
+                        {
+                            model.Screens = new List<ScreenViewModel>();
+
+                            int index = 0;
+                            while (form[$"Screens[{index}].ScreenType"] != null)
+                            {
+                                model.Screens.Add(new ScreenViewModel
+                                {
+                                    ScreenType = form[$"Screens[{index}].ScreenType"],
+                                    TotalShow = int.TryParse(form[$"Screens[{index}].TotalShow"], out int totalShow) ? totalShow : 0,
+                                    CancelShow = int.TryParse(form[$"Screens[{index}].CancelShow"], out int cancelShow) ? cancelShow : 0,
+                                    AmtPerScreen = decimal.TryParse(form[$"Screens[{index}].AmtPerScreen"], out decimal amt) ? amt : 0
+                                });
+
+                                index++;
+                            }
+                        }
+
+                        if (model.Screens.Count == 0)
+                        {
+                            TempData["Error"] = "No screen data available.";
+                            return RedirectToAction("Index");
+                        }
+
+                        // ✅ **Step 4: Insert into THEATER_TAX_PAYMENT**
+                        for (DateTime currentDate = fromDate; currentDate <= toDate; currentDate = currentDate.AddMonths(1))
+                        {
+                            var taxPayment = new THEATER_TAX_PAYMENT
+                            {
+                                ApplId = model.ApplId,
+                                PaymentMonth = currentDate.ToString("MMMM"),
+                                PaymentYear = currentDate.Year,
+                                TaxAmount = model.Screens.Sum(s => s.AmtPerScreen),
+                                ShowStatement = filePath,
+                                CreateUser = "System",
+                                CreateDate = DateTime.Now
+                            };
+
+                            db1.THEATER_TAX_PAYMENT.Add(taxPayment);
+                            db1.SaveChanges();
+
+                            // ✅ **Step 5: Insert Screens into NO_OF_SCREENS_TAX**
+                            foreach (var screen in model.Screens)
+                            {
+                                var screenTax = new NO_OF_SCREENS_TAX
+                                {
+                                    ApplId = model.ApplId,
+                                    TaxId = taxPayment.TaxId,
+                                    ScreenType = screen.ScreenType ?? "Unknown",
+                                    TotalShow = screen.TotalShow,
+                                    CancelShow = screen.CancelShow,
+                                    ActualShow = Math.Max(0, screen.TotalShow - screen.CancelShow),
+                                    RatePerScreen = (screen.ScreenType == "Theater") ? 75 : 25,
+                                    AmountPerScreen = screen.AmtPerScreen
+                                };
+
+                                db1.NO_OF_SCREENS_TAX.Add(screenTax);
+                            }
+                        }
+
+                        db1.SaveChanges();
+                        transaction.Commit();
+                        TempData["Success"] = "Tax payment saved successfully!";
+                        return RedirectToAction("Theater_Tax");
+                    }
+                    catch (DbUpdateException ex)
+                    {
+                        transaction.Rollback();
+                        conn.Close();
+                        Debug.WriteLine($"DB2 Error: {ex.InnerException?.InnerException?.Message}");
+                        TempData["ErrorMessage"] = "Database update error. Check logs for details.";
+                        return View(model);
+                    }
+                    finally
+                    {
+                        conn.Close(); // ✅ Close DB2 Connection
+                    }
+                }
+            }
+        }
+
         [HttpGet]
         public ActionResult Theater_List()
         {
@@ -943,6 +1074,7 @@ namespace AMC_THEATER_1.Controllers
                             select new
                             {
                                 tr.TId,
+                                tr.ApplId,
                                 //tr.RegId,
                                 tr.TName,
                                 tr.TCity,
@@ -968,6 +1100,7 @@ namespace AMC_THEATER_1.Controllers
                 theaterList = result.Select(tr => new TheaterViewModel
                 {
                     T_ID = tr.TId,
+                    ApplId=tr.ApplId,
                     //REG_ID = tr.RegId,
                     T_NAME = tr.TName,
                     T_CITY = tr.TCity,
